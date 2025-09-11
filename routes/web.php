@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
 
@@ -24,12 +25,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Route untuk menampilkan daftar user (untuk sementara)
-    Route::get('/users', function () {
-        return 'Ini adalah halaman Admin untuk manajemen user.';
-    })->name('users.index');
-    
-    // Nanti kita akan tambahkan route lain di sini
+    // Menggunakan Route::resource akan otomatis membuat route index, create, store, dll.
+    Route::resource('users', UserController::class);
 });
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');
