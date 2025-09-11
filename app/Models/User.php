@@ -57,4 +57,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(leaveRequest::class);
     }
+
+    /**
+     * Relasi untuk mendapatkan data atasan dari seorang pegawai.
+     */
+    public function superior()
+    {
+        return $this->belongsTo(User::class, 'atasan_id');
+    }
+
+    /**
+     * Relasi untuk mendapatkan semua bawahan dari seorang atasan.
+     */
+    public function subordinates()
+    {
+        return $this->hasMany(User::class, 'atasan_id');
+    }
 }

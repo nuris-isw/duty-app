@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class LeaveRequest extends Model
 {
@@ -21,5 +22,15 @@ class LeaveRequest extends Model
         'end_date',
         'reason',
         'status',
+        'approved_by', 
+        'approved_at',
     ];
+
+    /**
+     * Mendefinisikan relasi bahwa setiap request dimiliki oleh satu user.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

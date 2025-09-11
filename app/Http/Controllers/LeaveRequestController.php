@@ -40,4 +40,37 @@ class LeaveRequestController extends Controller
         // 4. Redirect ke dashboard dengan pesan sukses
         return redirect()->route('dashboard')->with('success', 'Pengajuan cuti berhasil dikirim.');
     }
+
+    /**
+     * Menyetujui pengajuan cuti.
+     */
+    public function approve(LeaveRequest $leaveRequest)
+    {
+        // Otorisasi: Pastikan user yang login adalah atasan dari pemohon
+        // (Ini akan kita tambahkan nanti untuk keamanan ekstra)
+
+        $leaveRequest->update([
+            'status' => 'approved',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil disetujui.');
+    }
+
+    /**
+     * Menolak pengajuan cuti.
+     */
+    public function reject(LeaveRequest $leaveRequest)
+    {
+        // Otorisasi: Sama seperti di atas
+        
+        $leaveRequest->update([
+            'status' => 'rejected',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil ditolak.');
+    }
 }
