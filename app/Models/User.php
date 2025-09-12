@@ -28,6 +28,8 @@ class User extends Authenticatable
         'role', // <-- Tambahan
         'atasan_id', // <-- Tambahan
         'signature', // <-- Tambahan
+        'unit_kerja_id',
+        'jabatan_id',
     ];
 
     /**
@@ -72,5 +74,15 @@ class User extends Authenticatable
     public function subordinates()
     {
         return $this->hasMany(User::class, 'atasan_id');
+    }
+
+    public function unitKerja()
+    {
+        return $this->belongsTo(UnitKerja::class);
+    }
+
+    public function jabatan()
+    {
+        return $this->belongsTo(Jabatan::class);
     }
 }

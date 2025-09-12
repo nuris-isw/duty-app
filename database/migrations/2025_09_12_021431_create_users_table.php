@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('google_id')->nullable();
             $table->string('avatar')->nullable();
             $table->enum('role', ['admin', 'atasan', 'pegawai'])->default('pegawai');
+            $table->foreignId('unit_kerja_id')->nullable()->constrained('unit_kerjas')->onDelete('set null');
+            $table->foreignId('jabatan_id')->nullable()->constrained('jabatans')->onDelete('set null');
             $table->foreignId('atasan_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('signature')->nullable(); // Path ke file gambar ttd
             $table->rememberToken();

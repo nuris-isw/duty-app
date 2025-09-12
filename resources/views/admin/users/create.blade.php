@@ -39,6 +39,24 @@
                                 <option value="pegawai" selected>Pegawai</option>
                             </select>
                         </div>
+
+                        <div class="mt-4">
+                            <x-input-label for="unit_kerja_id" :value="__('Unit Kerja')" />
+                            <select name="unit_kerja_id" id="unit_kerja_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                @foreach ($unitKerjas as $unit)
+                                    <option value="{{ $unit->id }}">{{ $unit->nama_unit }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mt-4">
+                            <x-input-label for="jabatan_id" :value="__('Jabatan')" />
+                            <select name="jabatan_id" id="jabatan_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                @foreach ($jabatans as $jabatan)
+                                    <option value="{{ $jabatan->id }}">{{ $jabatan->nama_jabatan }} - {{ $jabatan->bidang_kerja }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         
                         <div class="mt-4">
                             <x-input-label for="atasan_id" :value="__('Pilih Atasan (jika role Pegawai)')" />
