@@ -13,7 +13,7 @@ Gate::define('is-admin', function ($user) {
 });
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])

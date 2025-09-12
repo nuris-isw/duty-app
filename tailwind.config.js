@@ -14,6 +14,13 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                brand: {
+                    light: "#DCDBDB", // abu terang
+                    dark: "#010101",  // hitam
+                    accent: "#E4252C" // merah
+                }
+            },
         },
     },
 

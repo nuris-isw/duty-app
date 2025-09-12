@@ -17,17 +17,10 @@
                     @endif
 
                     <!-- Tombol Tambah User -->
-                    <div class="mb-6 bg-grey text-black-900">
-                        <button 
-                            type="button" 
-                            onclick="window.location='{{ route('admin.users.create') }}'" 
-                            class="inline-flex items-center px-4 py-2 bg-green-600 
-                                hover:bg-green-700 focus:outline-none focus:ring-2 
-                                focus:ring-offset-2 focus:ring-green-500 
-                                text-white font-semibold text-sm rounded-md shadow-sm 
-                                transition ease-in-out duration-150">
+                    <div class="mb-6">
+                        <x-primary-button onclick="window.location='{{ route('admin.users.create') }}'">
                             + Tambah User Baru
-                        </button>
+                        </x-primary-button>
                     </div>
 
                     <!-- Tabel User -->
