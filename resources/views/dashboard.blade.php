@@ -83,6 +83,7 @@
                                 <th class="px-6 py-3 text-left font-medium">Jenis Cuti</th>
                                 <th class="px-6 py-3 text-left font-medium">Tanggal</th>
                                 <th class="px-6 py-3 text-left font-medium">Status</th>
+                                <th class="px-6 py-3 text-left font-medium">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -105,10 +106,19 @@
                                             {{ ucfirst($request->status) }}
                                         </span>
                                     </td>
+                                    <td class="px-6 py-4">
+                                        @if ($request->status === 'approved')
+                                            <a href="{{ route('leave-requests.print', $request) }}" 
+                                               class="px-3 py-1 rounded-lg bg-gray-700 text-black text-xs hover:bg-gray-800 transition"
+                                               target="_blank">
+                                                Cetak
+                                            </a>
+                                        @endif
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
                                         Anda belum memiliki riwayat pengajuan cuti.
                                     </td>
                                 </tr>

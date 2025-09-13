@@ -33,4 +33,12 @@ class LeaveRequest extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Relasi untuk mendapatkan data user yang menyetujui.
+     */
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
 }

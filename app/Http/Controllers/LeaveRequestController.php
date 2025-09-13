@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\LeaveRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail; // <-- Tambahkan ini
 use App\Mail\LeaveRequestStatusUpdated; // <-- Tambahkan ini
 use App\Mail\NewLeaveRequestForSuperior; // <-- Tambahkan ini
+use Barryvdh\DomPDF\Facade\Pdf; 
 
 class LeaveRequestController extends Controller
 {
@@ -91,5 +93,23 @@ class LeaveRequestController extends Controller
         Mail::to($leaveRequest->user->email)->send(new LeaveRequestStatusUpdated($leaveRequest));
 
         return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil ditolak.');
+    }
+
+    /**
+     * Menyiapkan data dan men-generate PDF.
+     */
+    public function print(LeaveRequest $leaveRequest)
+    {
+        // 1. Otorisasi (pastikan user yang meminta adalah pemilik atau admin)
+        if (Auth::id() !== $leaveRequest->user_id && Auth::user()->role !== 'admin') {
+            abort(403, 'Akses Ditolak');
+        }
+
+        // 2. Langsung load view dan kirim objek $leaveRequest
+        // Relasi 'user' (pemohon) dan 'approver' (atasan) akan diakses dari dalam view
+        $pdf = PDF::loadView('leave-requests.pdf', ['leaveRequest' => $leaveRequest]);
+
+        // 3. Tampilkan PDF di browser
+        return $pdf->stream('surat-izin-'.$leaveRequest->id.'.pdf');
     }
 }
