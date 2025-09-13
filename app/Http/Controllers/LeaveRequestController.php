@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail; // <-- Tambahkan ini
+use App\Mail\LeaveRequestStatusUpdated; // <-- Tambahkan ini
+use App\Mail\NewLeaveRequestForSuperior; // <-- Tambahkan ini
 
 class LeaveRequestController extends Controller
 {
@@ -35,7 +38,17 @@ class LeaveRequestController extends Controller
         $validatedData['user_id'] = Auth::id();
 
         // 3. Simpan ke database
-        LeaveRequest::create($validatedData);
+        $leaveRequest = LeaveRequest::create($validatedData);
+
+        // 4. KIRIM EMAIL KE ATASAN (Logika Baru)
+        $user = Auth::user();
+        // Cek apakah user punya atasan
+        if ($user->atasan_id) {
+            // Ambil data atasan
+            $superior = $user->superior; 
+            // Kirim email ke atasan
+            Mail::to($superior->email)->send(new NewLeaveRequestForSuperior($leaveRequest));
+        }
 
         // 4. Redirect ke dashboard dengan pesan sukses
         return redirect()->route('dashboard')->with('success', 'Pengajuan cuti berhasil dikirim.');
@@ -55,6 +68,9 @@ class LeaveRequestController extends Controller
             'approved_at' => now(),
         ]);
 
+        // Kirim email ke pegawai yang mengajukan
+        Mail::to($leaveRequest->user->email)->send(new LeaveRequestStatusUpdated($leaveRequest));
+
         return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil disetujui.');
     }
 
@@ -70,6 +86,9 @@ class LeaveRequestController extends Controller
             'approved_by' => Auth::id(),
             'approved_at' => now(),
         ]);
+
+        // Kirim email ke pegawai yang mengajukan
+        Mail::to($leaveRequest->user->email)->send(new LeaveRequestStatusUpdated($leaveRequest));
 
         return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil ditolak.');
     }
