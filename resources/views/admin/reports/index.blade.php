@@ -47,7 +47,7 @@
                             @forelse ($leaveRequests as $request)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4">{{ $request->user->name ?? 'N/A' }}</td>
-                                    <td class="px-6 py-4">{{ $request->user->jabatan->nama_jabatan ?? 'N/A' }}</td>
+                                    <td class="px-6 py-4">{{ $request->user->jabatan->nama_jabatan ?? 'N/A' }} {{ $request->user->jabatan->bidang_kerja ?? 'N/A' }}</td>
                                     <td class="px-6 py-4">{{ $request->leave_type }}</td>
                                     <td class="px-6 py-4">
                                         {{ \Carbon\Carbon::parse($request->start_date)->format('d M Y') }} - 

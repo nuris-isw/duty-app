@@ -38,6 +38,9 @@
                                 <x-dropdown-link :href="route('admin.unit-kerja.index')" :active="request()->routeIs('admin.unit-kerja.*')">
                                     {{ __('Manajemen Unit Kerja') }}
                                 </x-dropdown-link>
+                                <x-dropdown-link :href="route('admin.jabatan.index')" :active="request()->routeIs('admin.jabatan.*')">
+                                    {{ __('Manajemen Jabatan') }}
+                                </x-dropdown-link>
                                 {{-- Nanti kita akan tambahkan route untuk Unit Kerja & Jabatan di sini --}}
                             </x-slot>
                         </x-dropdown>
