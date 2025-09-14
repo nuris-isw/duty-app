@@ -48,28 +48,38 @@
 
     <table class="signatures">
         <tr>
-            <td>
-                <p>Menyetujui,</p>
-                <p>{{ $leaveRequest->approver->jabatan->nama_jabatan ?? '-' }} {{ $leaveRequest->user->jabatan->alias ?? '' }}</p>
-                <br><br>
-                {{-- Cek relasi 'approver' dan apakah signature-nya ada --}}
-                @if ($leaveRequest->approver && $leaveRequest->approver->signature)
-                    <img src="{{ storage_path('app/public/' . $leaveRequest->approver->signature) }}" alt="TTD Atasan">
-                @else
-                    <p>(Belum ada TTD)</p>
-                @endif
-                <p><strong>{{ $leaveRequest->approver->name ?? 'Atasan' }}</strong></p>
-            </td>
-            <td>
-                <p>-</p>
+            {{-- BAGIAN KIRI: PEMOHON --}}
+            <td style="vertical-align: bottom; text-align: center;">
                 <p>Pemohon,</p>
+                {{-- Jabatan dipindah ke atas TTD --}}
+                <p>{{ $leaveRequest->user->jabatan->nama_jabatan ?? '' }} {{ $leaveRequest->user->jabatan->alias ?? '' }}</p>
                 <br><br>
+                
                 @if ($leaveRequest->user->signature)
-                    <img src="{{ storage_path('app/public/' . $leaveRequest->user->signature) }}" alt="TTD Pemohon">
+                    <img src="{{ storage_path('app/public/' . $leaveRequest->user->signature) }}" alt="TTD Pemohon" style="max-height: 60px; display: block; margin-left: auto; margin-right: auto;">
                 @else
-                    <p>(Belum ada TTD)</p>
+                    <p style="height: 60px;">(Belum ada TTD)</p>
                 @endif
+                
+                {{-- Nama dipindah ke bawah TTD --}}
                 <p><strong>{{ $leaveRequest->user->name }}</strong></p>
+            </td>
+
+            {{-- BAGIAN KANAN: MENYETUJUI --}}
+            <td style="vertical-align: bottom; text-align: center;">
+                <p>Menyetujui,</p>
+                {{-- Jabatan dipindah ke atas TTD --}}
+                <p>{{ $leaveRequest->approver->jabatan->nama_jabatan ?? '' }} {{ $leaveRequest->approver->jabatan->alias ?? '' }}</p>
+                <br><br>
+
+                @if ($leaveRequest->approver && $leaveRequest->approver->signature)
+                    <img src="{{ storage_path('app/public/' . $leaveRequest->approver->signature) }}" alt="TTD Atasan" style="max-height: 60px; display: block; margin-left: auto; margin-right: auto;">
+                @else
+                    <p style="height: 60px;">(Belum ada TTD)</p>
+                @endif
+
+                {{-- Nama dipindah ke bawah TTD --}}
+                <p><strong>{{ $leaveRequest->approver->name ?? 'Atasan' }}</strong></p>
             </td>
         </tr>
     </table>
