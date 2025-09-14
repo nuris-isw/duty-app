@@ -16,6 +16,12 @@
                         </div>
                     @endif
 
+                    @if (session('error'))
+                        <div class="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
                     <!-- Tombol Tambah User -->
                     <div class="mb-6">
                         <x-primary-button onclick="window.location='{{ route('admin.users.create') }}'">
@@ -37,6 +43,9 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                                         Role
                                     </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                        Aksi
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -53,6 +62,15 @@
                                                         {{ $user->role === 'admin' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800' }}">
                                                 {{ ucfirst($user->role) }}
                                             </span>
+                                        </td>
+                                        <td class="px-6 py-4 flex items-center space-x-3">
+                                            <a href="{{ route('admin.users.edit', $user->id) }}" class="text-indigo-600 hover:text-indigo-900 font-semibold">Edit</a>
+                                            <p>---</p>
+                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900 font-semibold">Hapus</button>
+                                            </form>
                                         </td>
                                     </tr>
                                 @empty
