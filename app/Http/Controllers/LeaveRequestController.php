@@ -2,57 +2,106 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LeaveType;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Models\UserLeaveQuota;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail; // <-- Tambahkan ini
-use App\Mail\LeaveRequestStatusUpdated; // <-- Tambahkan ini
-use App\Mail\NewLeaveRequestForSuperior; // <-- Tambahkan ini
-use Barryvdh\DomPDF\Facade\Pdf; 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\LeaveRequestStatusUpdated;
+use App\Mail\NewLeaveRequestForSuperior;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class LeaveRequestController extends Controller
 {
+    /**
+     * Menampilkan form untuk membuat pengajuan baru.
+     */
     public function create()
     {
-        // Daftar jenis cuti yang bisa dipilih
-        $leaveTypes = [
-            'Cuti Tahunan',
-            'Izin Sakit',
-            'Cuti Alasan Penting',
-            'Cuti Melahirkan',
-        ];
-
-        return view('leave-requests.create', ['leaveTypes' => $leaveTypes]);
+        // Ambil semua jenis cuti dari database untuk ditampilkan di dropdown
+        $leaveTypes = LeaveType::all();
+        return view('leave-requests.create', compact('leaveTypes'));
     }
 
+    /**
+     * Menyimpan pengajuan baru ke database.
+     */
     public function store(Request $request)
     {
-        // 1. Validasi data form
-        $validatedData = $request->validate([
-            'leave_type' => 'required|string',
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'reason' => 'required|string',
-        ]);
-
-        // 2. Tambahkan user_id dari user yang sedang login
-        $validatedData['user_id'] = Auth::id();
-
-        // 3. Simpan ke database
-        $leaveRequest = LeaveRequest::create($validatedData);
-
-        // 4. KIRIM EMAIL KE ATASAN (Logika Baru)
+        // 1. Validasi Awal & Ambil Aturan Cuti
+        $request->validate(['leave_type_id' => 'required|exists:leave_types,id']);
+        $leaveType = LeaveType::find($request->leave_type_id);
         $user = Auth::user();
-        // Cek apakah user punya atasan
-        if ($user->atasan_id) {
-            // Ambil data atasan
-            $superior = $user->superior; 
-            // Kirim email ke atasan
-            Mail::to($superior->email)->send(new NewLeaveRequestForSuperior($leaveRequest));
+
+        // Atur nilai default SEBELUM validasi
+        if ($leaveType->nama_cuti === 'Izin Sakit') {
+            $request->merge(['reason' => 'Sakit']);
         }
 
-        // 4. Redirect ke dashboard dengan pesan sukses
+        // 2. Validasi Lanjutan Berdasarkan Aturan
+        $rules = [
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'reason' => 'nullable|string',
+        ];
+        if (!$leaveType->bisa_retroaktif) {
+            $rules['start_date'] .= '|after_or_equal:today';
+        }
+        if ($leaveType->memerlukan_dokumen) {
+            $rules['dokumen_pendukung'] = 'required|file|mimes:pdf,jpg,png|max:2048';
+        }
+        $validatedData = $request->validate($rules);
+
+        // 3. Pengecekan Kuota
+        if ($leaveType->kuota > 0) {
+            $startDate = Carbon::parse($validatedData['start_date']);
+            $endDate = Carbon::parse($validatedData['end_date']);
+            $duration = $startDate->diffInDaysFiltered(function (Carbon $date) {
+                return !$date->isWeekend(); // Hanya hitung hari kerja
+            }, $endDate) + ($startDate->isWeekend() ? 0 : 1);
+
+
+            $quota = UserLeaveQuota::firstOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'leave_type_id' => $leaveType->id,
+                    'tahun' => $startDate->year
+                ],
+                [
+                    'jumlah_diambil' => 0
+                ]
+            );
+            
+            $sisaKuota = $leaveType->kuota - $quota->jumlah_diambil;
+            if ($duration > $sisaKuota) {
+                return back()->withErrors(['start_date' => 'Jatah cuti tidak mencukupi. Sisa: ' . $sisaKuota . ' hari.'])->withInput();
+            }
+        }
+
+        // 4. Simpan Dokumen
+        $documentPath = null;
+        if ($request->hasFile('dokumen_pendukung')) {
+            $documentPath = $request->file('dokumen_pendukung')->store('attachments', 'public');
+        }
+
+        // 5. Simpan Pengajuan
+        $leaveRequest = LeaveRequest::create([
+            'user_id' => $user->id,
+            'leave_type' => $leaveType->nama_cuti,
+            'start_date' => $validatedData['start_date'],
+            'end_date' => $validatedData['end_date'],
+            'reason' => $validatedData['reason'],
+            'dokumen_pendukung' => $documentPath,
+        ]);
+
+        // 6. Kirim Email ke Atasan
+        if ($user->atasan_id) {
+            Mail::to($user->superior->email)->send(new NewLeaveRequestForSuperior($leaveRequest));
+        }
+
         return redirect()->route('dashboard')->with('success', 'Pengajuan cuti berhasil dikirim.');
     }
 
@@ -61,18 +110,38 @@ class LeaveRequestController extends Controller
      */
     public function approve(LeaveRequest $leaveRequest)
     {
-        // Otorisasi: Pastikan user yang login adalah atasan dari pemohon
-        // (Ini akan kita tambahkan nanti untuk keamanan ekstra)
-
         $leaveRequest->update([
             'status' => 'approved',
             'approved_by' => Auth::id(),
             'approved_at' => now(),
         ]);
 
-        // Kirim email ke pegawai yang mengajukan
-        Mail::to($leaveRequest->user->email)->send(new LeaveRequestStatusUpdated($leaveRequest));
+        // Kurangi jatah cuti jika perlu
+        $leaveType = LeaveType::where('nama_cuti', $leaveRequest->leave_type)->first();
+        // Cek apakah jenis cuti ini memiliki kuota yang harus dikurangi
+        if ($leaveType && $leaveType->kuota > 0) {
+        // Hitung durasi cuti (hanya hari kerja)
+            $startDate = Carbon::parse($leaveRequest->start_date);
+            $endDate = Carbon::parse($leaveRequest->end_date);
+            $duration = $startDate->diffInDaysFiltered(function (Carbon $date) {
+                return !$date->isWeekend();
+            }, $endDate) + ($startDate->isWeekend() ? 0 : 1);
 
+            // Cari atau buat data kuota user untuk tahun ini
+            $quota = UserLeaveQuota::firstOrCreate(
+                [
+                    'user_id' => $leaveRequest->user_id, 
+                    'leave_type_id' => $leaveType->id, 
+                    'tahun' => $startDate->year
+                ],
+                ['jumlah_diambil' => 0]
+            );
+
+            // Tambahkan jumlah hari yang diambil
+            $quota->increment('jumlah_diambil', $duration);
+        }
+
+        Mail::to($leaveRequest->user->email)->send(new LeaveRequestStatusUpdated($leaveRequest));
         return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil disetujui.');
     }
 
@@ -81,17 +150,13 @@ class LeaveRequestController extends Controller
      */
     public function reject(LeaveRequest $leaveRequest)
     {
-        // Otorisasi: Sama seperti di atas
-        
         $leaveRequest->update([
             'status' => 'rejected',
             'approved_by' => Auth::id(),
             'approved_at' => now(),
         ]);
 
-        // Kirim email ke pegawai yang mengajukan
         Mail::to($leaveRequest->user->email)->send(new LeaveRequestStatusUpdated($leaveRequest));
-
         return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil ditolak.');
     }
 
@@ -100,16 +165,11 @@ class LeaveRequestController extends Controller
      */
     public function print(LeaveRequest $leaveRequest)
     {
-        // 1. Otorisasi (pastikan user yang meminta adalah pemilik atau admin)
         if (Auth::id() !== $leaveRequest->user_id && Auth::user()->role !== 'admin') {
             abort(403, 'Akses Ditolak');
         }
 
-        // 2. Langsung load view dan kirim objek $leaveRequest
-        // Relasi 'user' (pemohon) dan 'approver' (atasan) akan diakses dari dalam view
         $pdf = PDF::loadView('leave-requests.pdf', ['leaveRequest' => $leaveRequest]);
-
-        // 3. Tampilkan PDF di browser
         return $pdf->stream('surat-izin-'.$leaveRequest->id.'.pdf');
     }
 }
