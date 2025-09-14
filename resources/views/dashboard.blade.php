@@ -15,6 +15,59 @@
                 </div>
             @endif
 
+            <!-- BAGIAN BARU: DASHBOARD KHUSUS ADMIN -->
+            @if (Auth::user()->role === 'admin')
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-blue-500 text-black p-6 rounded-2xl shadow-md">
+                        <h4 class="text-lg font-semibold">Total Pegawai</h4>
+                        <p class="text-3xl font-bold">{{ $stats['total_pegawai'] }}</p>
+                    </div>
+                    <div class="bg-yellow-500 text-black p-6 rounded-2xl shadow-md">
+                        <h4 class="text-lg font-semibold">Pengajuan Pending</h4>
+                        <p class="text-3xl font-bold">{{ $stats['pending_requests'] }}</p>
+                    </div>
+                    <div class="bg-green-500 text-black p-6 rounded-2xl shadow-md">
+                        <h4 class="text-lg font-semibold">Disetujui Bulan Ini</h4>
+                        <p class="text-3xl font-bold">{{ $stats['approved_this_month'] }}</p>
+                    </div>
+                </div>
+
+                <div class="bg-brand-light shadow-md rounded-2xl p-6">
+                    <h3 class="font-semibold text-lg text-brand-dark mb-4">
+                        Daftar Pegawai Cuti (30 Hari ke Depan)
+                    </h3>
+                    <div class="overflow-x-auto rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-300 text-sm">
+                            <thead class="bg-brand-dark text-white">
+                                <tr>
+                                    <th class="px-6 py-3 text-left font-medium">Nama Pegawai</th>
+                                    <th class="px-6 py-3 text-left font-medium">Jabatan</th>
+                                    <th class="px-6 py-3 text-left font-medium">Tanggal Cuti</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @forelse ($upcomingLeaves as $leave)
+                                    <tr class="hover:bg-gray-50 transition">
+                                        <td class="px-6 py-4">{{ $leave->user->name }}</td>
+                                        <td class="px-6 py-4">{{ $leave->user->jabatan->nama_jabatan ?? 'N/A' }} {{ $leave->user->jabatan->bidang_kerja ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4">
+                                            {{ \Carbon\Carbon::parse($leave->start_date)->format('d M') }} - 
+                                            {{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="px-6 py-4 text-center text-gray-500">
+                                            Tidak ada pegawai yang cuti dalam 30 hari ke depan.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+
             <!-- BAGIAN 1: PENGAJUAN PENDING DARI BAWAHAN (UNTUK ATASAN) -->
             @if (Auth::user()->role === 'atasan' && $subordinatePendingRequests->isNotEmpty())
                 <div class="bg-brand-light shadow-md rounded-2xl p-6">
