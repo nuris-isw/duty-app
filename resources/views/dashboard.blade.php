@@ -30,21 +30,21 @@
 
                 <div class="bg-white dark:bg-neutral-800 shadow-md rounded-2xl p-6 overflow-hidden">
                     <h3 class="font-semibold text-lg text-brand-dark mb-4">Daftar Pegawai Cuti (30 Hari ke Depan)</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm">
+                    <div class="overflow-x-auto border border-neutral-200 dark:border-neutral-700 rounded-lg">
+                        <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
                             <thead class="bg-neutral-100 dark:bg-neutral-900">
-                                <tr>
-                                    <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Nama Pegawai</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Jabatan</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Tanggal Cuti</th>
+                                <tr class="divide-x divide-neutral-200 dark:divide-neutral-700">
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Nama Pegawai</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Jabatan</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Tanggal Cuti</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
                                 @forelse ($upcomingLeaves as $leave)
-                                    <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
+                                    <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $leave->user->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $leave->user->jabatan->nama_jabatan ?? 'N/A' }} {{ $leave->user->jabatan->bidang_kerja ?? '' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ \Carbon\Carbon::parse($leave->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ \Carbon\Carbon::parse($leave->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -60,30 +60,24 @@
             @if (Auth::user()->role === 'atasan' && $subordinatePendingRequests->isNotEmpty())
                 <div class="bg-white dark:bg-neutral-800 shadow-md rounded-2xl p-6 overflow-hidden">
                     <h3 class="font-semibold text-lg text-brand-dark mb-4">Pengajuan Cuti Perlu Persetujuan</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm">
+                    <div class="overflow-x-auto border border-neutral-200 dark:border-neutral-700 rounded-lg">
+                        <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
                             <thead class="bg-neutral-100 dark:bg-neutral-900">
-                                <tr>
-                                    <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Nama Pemohon</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Tanggal</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Aksi</th>
+                                <tr class="divide-x divide-neutral-200 dark:divide-neutral-700">
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Nama Pemohon</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Tanggal</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
                                 @foreach ($subordinatePendingRequests as $request)
-                                    <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
+                                    <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $request->user->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
                                         <td class="px-6 py-4">
-                                            <div class="flex space-x-2">
-                                                <form action="{{ route('leave-requests.approve', $request) }}" method="POST">
-                                                    @csrf @method('PATCH')
-                                                    <x-primary-button class="!py-1.5 !px-3 !text-xs">{{ __('Setujui') }}</x-primary-button>
-                                                </form>
-                                                <form action="{{ route('leave-requests.reject', $request) }}" method="POST">
-                                                    @csrf @method('PATCH')
-                                                    <x-danger-button class="!py-1.5 !px-3 !text-xs">{{ __('Tolak') }}</x-danger-button>
-                                                </form>
+                                            <div class="flex items-center justify-center space-x-2">
+                                                <form action="{{ route('leave-requests.approve', $request) }}" method="POST">@csrf @method('PATCH')<x-primary-button class="!py-1.5 !px-3 !text-xs">{{ __('Setujui') }}</x-primary-button></form>
+                                                <form action="{{ route('leave-requests.reject', $request) }}" method="POST">@csrf @method('PATCH')<x-danger-button class="!py-1.5 !px-3 !text-xs">{{ __('Tolak') }}</x-danger-button></form>
                                             </div>
                                         </td>
                                     </tr>
@@ -97,41 +91,35 @@
             <div class="bg-white dark:bg-neutral-800 shadow-md rounded-2xl p-6 overflow-hidden">
                 <div class="flex flex-wrap gap-4 justify-between items-center mb-4">
                     <h3 class="font-semibold text-lg text-brand-dark">Riwayat Pengajuan Cuti Anda</h3>
-                    <a href="{{ route('leave-requests.create') }}">
-                        <x-primary-button type="button">+ Ajukan Cuti/Izin</x-primary-button>
-                    </a>
+                    <a href="{{ route('leave-requests.create') }}"><x-primary-button type="button">+ Ajukan Cuti/Izin</x-primary-button></a>
                 </div>
-                <div class="overflow-x-auto">
-                     <table class="min-w-full text-sm">
+                <div class="overflow-x-auto border border-neutral-200 dark:border-neutral-700 rounded-lg">
+                     <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
                         <thead class="bg-neutral-100 dark:bg-neutral-900">
-                            <tr>
-                                <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Jenis Cuti</th>
-                                <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Tanggal</th>
-                                <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Status</th>
-                                <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Aksi</th>
+                            <tr class="divide-x divide-neutral-200 dark:divide-neutral-700">
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Jenis Cuti</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Tanggal</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
                             @forelse ($myLeaveRequests as $request)
-                                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
+                                <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
                                     <td class="px-6 py-4 whitespace-nowrap">{{ $request->leave_type }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
-                                    <td class="px-6 py-4">
-                                        @php
-                                            $statusClass = ['pending' => 'bg-yellow-100 text-yellow-800', 'approved' => 'bg-green-100 text-green-800', 'rejected' => 'bg-red-100 text-red-800'][$request->status] ?? 'bg-gray-100 text-gray-800';
-                                        @endphp
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">{{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        @php $statusClass = ['pending' => 'bg-yellow-100 text-yellow-800', 'approved' => 'bg-green-100 text-green-800', 'rejected' => 'bg-red-100 text-red-800'][$request->status] ?? 'bg-gray-100 text-gray-800'; @endphp
                                         <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">{{ ucfirst($request->status) }}</span>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 text-center">
                                         @if ($request->status === 'approved')
                                             <a href="{{ route('leave-requests.print', $request) }}" class="px-3 py-1.5 rounded-lg bg-neutral-600 text-white text-xs hover:bg-neutral-900 transition" target="_blank">Cetak</a>
                                         @endif
                                     </td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-10 text-center text-neutral-500">Anda belum memiliki riwayat pengajuan cuti.</td>
-                                </tr>
+                                <tr><td colspan="4" class="px-6 py-10 text-center text-neutral-500">Anda belum memiliki riwayat pengajuan cuti.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -141,24 +129,22 @@
             @if (Auth::user()->role === 'atasan' && $subordinateHistoryRequests->isNotEmpty())
                 <div class="bg-white dark:bg-neutral-800 shadow-md rounded-2xl p-6 overflow-hidden">
                     <h3 class="font-semibold text-lg text-brand-dark mb-4">Riwayat Pengajuan Pegawai</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm">
+                    <div class="overflow-x-auto border border-neutral-200 dark:border-neutral-700 rounded-lg">
+                        <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
                             <thead class="bg-neutral-100 dark:bg-neutral-900">
-                                <tr>
-                                    <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Nama Pemohon</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Tanggal</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-neutral-600 dark:text-neutral-300">Status</th>
+                                <tr class="divide-x divide-neutral-200 dark:divide-neutral-700">
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Nama Pemohon</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Tanggal</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
                                 @foreach ($subordinateHistoryRequests as $request)
-                                    <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
+                                    <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $request->user->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
-                                        <td class="px-6 py-4">
-                                            @php
-                                                $statusClass = ['approved' => 'bg-green-100 text-green-800', 'rejected' => 'bg-red-100 text-red-800'][$request->status] ?? 'bg-gray-100 text-gray-800';
-                                            @endphp
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
+                                        <td class="px-6 py-4 text-center">
+                                            @php $statusClass = ['approved' => 'bg-green-100 text-green-800', 'rejected' => 'bg-red-100 text-red-800'][$request->status] ?? 'bg-gray-100 text-gray-800'; @endphp
                                             <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">{{ ucfirst($request->status) }}</span>
                                         </td>
                                     </tr>
@@ -168,7 +154,6 @@
                     </div>
                 </div>
             @endif
-
         </div>
     </div>
 </x-app-layout>

@@ -1,88 +1,83 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-bold text-2xl text-neutral-900 dark:text-neutral-100 leading-tight">
             {{ __('Manajemen User') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-grey overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <!-- === TAMBAHKAN BLOK UNTUK NOTIFIKASI === -->
-                    @if (session('success'))
-                        <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-lg">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-
-                    @if (session('error'))
-                        <div class="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-
-                    <!-- Tombol Tambah User -->
-                    <div class="mb-6">
-                        <x-primary-button onclick="window.location='{{ route('admin.users.create') }}'">
-                            + Tambah User Baru
-                        </x-primary-button>
+            <div class="bg-white dark:bg-neutral-800 shadow-md rounded-2xl p-6 overflow-hidden">
+                
+                {{-- Notifikasi --}}
+                @if (session('success'))
+                    <div class="mb-6 p-4 bg-green-50 text-green-700 border-l-4 border-green-400 rounded-lg">
+                        {{ session('success') }}
                     </div>
+                @endif
+                @if (session('error'))
+                    <div class="mb-6 p-4 bg-red-50 text-red-700 border-l-4 border-red-400 rounded-lg">
+                        {{ session('error') }}
+                    </div>
+                @endif
 
-                    <!-- Tabel User -->
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-md">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                        Nama
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                        Email
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                        Role
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                        Aksi
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse ($users as $user)
-                                    <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $user->name }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            {{ $user->email }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                        {{ $user->role === 'admin' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800' }}">
-                                                {{ ucfirst($user->role) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 flex items-center space-x-3">
-                                            <a href="{{ route('admin.users.edit', $user->id) }}" class="text-indigo-600 hover:text-indigo-900 font-semibold">Edit</a>
-                                            <p>---</p>
+                {{-- Tombol Tambah User --}}
+                <div class="mb-6">
+                    <x-primary-button onclick="window.location='{{ route('admin.users.create') }}'">
+                        + Tambah User Baru
+                    </x-primary-button>
+                </div>
+
+                {{-- Tabel User dengan Grid --}}
+                <div class="overflow-x-auto border border-neutral-200 dark:border-neutral-700 rounded-lg">
+                    <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+                        <thead class="bg-neutral-100 dark:bg-neutral-900">
+                            <tr class="divide-x divide-neutral-200 dark:divide-neutral-700">
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                                    Nama
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                                    Email
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                                    Role
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                                    Aksi
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
+                            @forelse ($users as $user)
+                                <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
+                                    <td class="px-6 py-4 whitespace-nowrap text-neutral-900 dark:text-neutral-100">{{ $user->name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-neutral-600 dark:text-neutral-300">{{ $user->email }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                     {{ $user->role === 'admin' ? 'bg-brand/[0.15] dark:bg-brand/[0.3] text-brand-dark dark:text-brand-light' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-100' }}">
+                                            {{ ucfirst($user->role) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center justify-center space-x-3">
+                                            <a href="{{ route('admin.users.edit', $user->id) }}" class="px-3 py-1.5 text-xs font-medium text-white bg-neutral-600 rounded-md hover:bg-neutral-700 transition">Edit</a>
                                             <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900 font-semibold">Hapus</button>
+                                                <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition">Hapus</button>
                                             </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
-                                            Belum ada user.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-6 py-10 text-center text-sm text-neutral-500">
+                                        Belum ada user.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
