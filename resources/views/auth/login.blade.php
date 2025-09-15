@@ -5,7 +5,7 @@
         Selamat Datang
     </h1>
     <p class="text-sm text-center text-neutral-600 dark:text-neutral-300 mb-6">
-        Login untuk melanjutkan ke akun Anda.
+        Login untuk melanjutkan ke akun Anda
     </p>
 
     <form method="POST" action="{{ route('login') }}" class="space-y-6">

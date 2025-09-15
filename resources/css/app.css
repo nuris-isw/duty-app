@@ -1,5 +1,22 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-@import "tailwindcss";
+@import 'tailwindcss';
 
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+  /* Menambahkan warna kustom Anda sebagai theme variable */
+  --color-brand-light: #EF3F3C;
+  --color-brand: #E4252C; /* Ini akan menjadi --color-brand-DEFAULT */
+  --color-brand-dark: #8F1924;
+  --color-brand-darker: #6C0C1C;
+
+  --color-neutral-100: #DCDBDB;
+  --color-neutral-300: #BCBCBC;
+  --color-neutral-600: #737272;
+  --color-neutral-900: #010101;
+
+  /* Anda juga bisa menimpa variabel default di sini jika perlu */
+  /* Contoh: --font-sans: Figtree, sans-serif; */
+}

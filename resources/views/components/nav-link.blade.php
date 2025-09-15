@@ -1,9 +1,14 @@
-@props(['active'])
+@props(['active' => false])
 
 @php
-$classes = ($active ?? false)
-            ? 'inline-flex items-center px-1 pt-1 border-b-2 border-indigo-400 text-sm font-medium leading-5 text-gray-900 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out'
-            : 'inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out';
+// Logika kelas dipisah agar lebih bersih dan mudah dibaca
+$baseClasses     = 'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 focus:outline-none transition duration-150 ease-in-out';
+
+$activeClasses   = 'border-brand text-brand font-bold dark:border-brand-light dark:text-brand-light';
+
+$inactiveClasses = 'border-transparent text-neutral-600 dark:text-neutral-300 hover:text-brand hover:border-brand/[0.3] dark:hover:text-brand-light dark:hover:border-brand-light/[0.3]';
+
+$classes = $baseClasses . ' ' . ($active ? $activeClasses : $inactiveClasses);
 @endphp
 
 <a {{ $attributes->merge(['class' => $classes]) }}>
