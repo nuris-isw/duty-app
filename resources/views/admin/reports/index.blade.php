@@ -1,65 +1,60 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-2xl text-brand-dark leading-tight">
+        <h2 class="font-bold text-2xl text-neutral-900 dark:text-neutral-100 leading-tight">
             {{ __('Laporan Pengajuan Izin & Cuti') }}
         </h2>
     </x-slot>
 
-    <div class="py-10">
+    <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-2xl p-6">
+            <div class="bg-white dark:bg-neutral-800 shadow-md rounded-2xl p-6 sm:p-8 border border-neutral-200 dark:border-neutral-700">
                 
-                <form method="GET" action="{{ route('admin.reports.index') }}" class="mb-6">
-                    <div class="flex items-center space-x-4">
-                        <div>
-                            <label for="start_date" class="text-sm font-medium text-gray-700">Dari Tanggal</label>
-                            <input type="date" name="start_date" id="start_date" value="{{ $startDate }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                {{-- Filter Bar yang Responsif --}}
+                <form method="GET" action="{{ route('admin.reports.index') }}" class="mb-8">
+                    <div class="flex flex-col md:flex-row md:items-end gap-4">
+                        <div class="flex-1">
+                            <x-input-label for="start_date" :value="__('Dari Tanggal')" />
+                            <x-text-input type="date" name="start_date" id="start_date" value="{{ $startDate }}" class="mt-1 block w-full" />
                         </div>
-                        <div>
-                            <label for="end_date" class="text-sm font-medium text-gray-700">Sampai Tanggal</label>
-                            <input type="date" name="end_date" id="end_date" value="{{ $endDate }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                        <div class="flex-1">
+                            <x-input-label for="end_date" :value="__('Sampai Tanggal')" />
+                            <x-text-input type="date" name="end_date" id="end_date" value="{{ $endDate }}" class="mt-1 block w-full" />
                         </div>
-                        <div class="pt-6">
-                            <button type="submit" class="px-4 py-2 rounded-lg bg-brand-accent text-black hover:bg-red-700">
-                                Filter
-                            </button>
-                            <a href="{{ route('admin.reports.print', ['start_date' => $startDate, 'end_date' => $endDate]) }}"
-                                target="_blank"
-                                class="px-4 py-2 rounded-lg bg-gray-600 text-black hover:bg-gray-700">
-                                    Cetak PDF
+                        <div class="flex items-center gap-2">
+                            <x-primary-button type="submit">Filter</x-primary-button>
+                            <a href="{{ route('admin.reports.print', ['start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank">
+                                <x-secondary-button type="button">Cetak PDF</x-secondary-button>
                             </a>
                         </div>
                     </div>
                 </form>
 
-                <div class="overflow-x-auto rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-300 text-sm">
-                        <thead class="bg-brand-dark text-black">
-                            <tr>
-                                <th class="px-6 py-3 text-left font-medium">Nama Pegawai</th>
-                                <th class="px-6 py-3 text-left font-medium">Jabatan</th>
-                                <th class="px-6 py-3 text-left font-medium">Jenis Cuti</th>
-                                <th class="px-6 py-3 text-left font-medium">Tanggal</th>
-                                <th class="px-6 py-3 text-left font-medium">Status</th>
+                {{-- Tabel Data dengan Gaya Grid --}}
+                <div class="overflow-x-auto border border-neutral-200 dark:border-neutral-700 rounded-lg">
+                    <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+                        <thead class="bg-neutral-100 dark:bg-neutral-900">
+                            <tr class="divide-x divide-neutral-200 dark:divide-neutral-700">
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Nama Pegawai</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Jabatan</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Jenis Cuti</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Tanggal</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
                             @forelse ($leaveRequests as $request)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4">{{ $request->user->name ?? 'N/A' }}</td>
-                                    <td class="px-6 py-4">{{ $request->user->jabatan->nama_jabatan ?? 'N/A' }} {{ $request->user->jabatan->bidang_kerja ?? 'N/A' }}</td>
-                                    <td class="px-6 py-4">{{ $request->leave_type }}</td>
-                                    <td class="px-6 py-4">
-                                        {{ \Carbon\Carbon::parse($request->start_date)->format('d M Y') }} - 
-                                        {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}
-                                    </td>
-                                    <td class="px-6 py-4">
+                                <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $request->user->name ?? 'N/A' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $request->user->jabatan->nama_jabatan ?? 'N/A' }} {{ $request->user->jabatan->alias ?? 'N/A' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $request->leave_type }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">{{ \Carbon\Carbon::parse($request->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
+                                    <td class="px-6 py-4 text-center">
                                         @php
                                             $statusClass = [
-                                                'pending' => 'bg-yellow-200 text-yellow-900',
-                                                'approved' => 'bg-green-200 text-green-900',
-                                                'rejected' => 'bg-red-200 text-red-900',
-                                            ][$request->status] ?? 'bg-gray-200 text-gray-800';
+                                                'pending' => 'bg-yellow-100 text-yellow-800',
+                                                'approved' => 'bg-green-100 text-green-800',
+                                                'rejected' => 'bg-red-100 text-red-800',
+                                            ][$request->status] ?? 'bg-gray-100 text-gray-800';
                                         @endphp
                                         <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">
                                             {{ ucfirst($request->status) }}
@@ -68,8 +63,8 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-                                        Tidak ada data untuk ditampilkan.
+                                    <td colspan="5" class="px-6 py-10 text-center text-sm text-neutral-500">
+                                        Tidak ada data untuk ditampilkan pada rentang tanggal ini.
                                     </td>
                                 </tr>
                             @endforelse

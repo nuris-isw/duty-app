@@ -80,7 +80,13 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-end mt-8">
+                    <div class="flex items-center justify-end gap-4 mt-8">
+                         <a href="{{ route('admin.users.index') }}">
+                            <x-secondary-button type="button">
+                                {{ __('Batal') }}
+                            </x-secondary-button>
+                        </a>
+
                         <x-primary-button>
                             {{ __('Update User') }}
                         </x-primary-button>

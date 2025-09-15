@@ -1,54 +1,62 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-2xl text-brand-dark leading-tight">
+        <h2 class="font-bold text-2xl text-neutral-900 dark:text-neutral-100 leading-tight">
             {{ __('Manajemen Unit Kerja') }}
         </h2>
     </x-slot>
 
-    <div class="py-10">
+    <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-2xl p-6">
+            <div class="bg-white dark:bg-neutral-800 shadow-md rounded-2xl p-6 sm:p-8 overflow-hidden">
+                
                 @if (session('success'))
-                    <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-lg" role="alert">
+                    <div class="mb-6 p-4 bg-green-50 text-green-700 border-l-4 border-green-400 rounded-lg" role="alert">
                         {{ session('success') }}
                     </div>
                 @endif
                 
-                {{-- Tombol Tambah --}}
+                {{-- Tombol Tambah menggunakan komponen --}}
                 <div class="mb-6 flex justify-end">
-                    <a href="{{ route('admin.unit-kerja.create') }}" class="px-4 py-2 rounded-lg bg-brand-accent text-black text-xs font-semibold uppercase hover:bg-red-700 transition">
+                    <x-primary-button onclick="window.location='{{ route('admin.unit-kerja.create') }}'">
                         + Tambah Unit Kerja
-                    </a>
+                    </x-primary-button>
                 </div>
 
-                {{-- Tabel Data --}}
-                <div class="overflow-x-auto rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-300 text-sm">
-                        <thead class="bg-brand-dark text-black">
-                            <tr>
-                                <th class="px-6 py-3 text-left font-medium">Nama Unit</th>
-                                <th class="px-6 py-3 text-left font-medium">Lokasi</th>
-                                <th class="px-6 py-3 text-left font-medium">Aksi</th>
+                {{-- Tabel Data dengan gaya grid --}}
+                <div class="overflow-x-auto border border-neutral-200 dark:border-neutral-700 rounded-lg">
+                    <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+                        <thead class="bg-neutral-100 dark:bg-neutral-900">
+                            <tr class="divide-x divide-neutral-200 dark:divide-neutral-700">
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                                    Nama Unit
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                                    Lokasi
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                                    Aksi
+                                </th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
                             @forelse ($unitKerjas as $unit)
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4">{{ $unit->nama_unit }}</td>
-                                    <td class="px-6 py-4">{{ $unit->lokasi }}</td>
-                                    <td class="px-6 py-4 flex items-center space-x-3">
-                                        <a href="{{ route('admin.unit-kerja.edit', $unit) }}" class="text-indigo-600 hover:text-indigo-900 font-semibold">Edit</a>
-                                        <p>---</p>
-                                        <form action="{{ route('admin.unit-kerja.destroy', $unit) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900 font-semibold">Hapus</button>
-                                        </form>
+                                <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $unit->nama_unit }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $unit->lokasi }}</td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center justify-center space-x-3">
+                                            <a href="{{ route('admin.unit-kerja.edit', $unit) }}" class="px-3 py-1.5 text-xs font-medium text-white bg-neutral-600 rounded-md hover:bg-neutral-700 transition">Edit</a>
+                                            <form action="{{ route('admin.unit-kerja.destroy', $unit) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition">Hapus</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-6 py-4 text-center text-gray-500">
+                                    <td colspan="3" class="px-6 py-10 text-center text-sm text-neutral-500">
                                         Belum ada data Unit Kerja.
                                     </td>
                                 </tr>
@@ -56,7 +64,6 @@
                         </tbody>
                     </table>
                 </div>
-
             </div>
         </div>
     </div>
