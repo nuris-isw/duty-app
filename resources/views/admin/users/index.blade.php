@@ -53,8 +53,18 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-neutral-900 dark:text-neutral-100">{{ $user->name }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-neutral-600 dark:text-neutral-300">{{ $user->email }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                     {{ $user->role === 'admin' ? 'bg-brand/[0.15] dark:bg-brand/[0.3] text-brand-dark dark:text-brand-light' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-100' }}">
+                                        @php
+                                            $roleClass = '';
+                                            if ($user->role === 'admin') {
+                                                $roleClass = 'bg-red-200 text-red-900';
+                                            } elseif ($user->role === 'atasan') {
+                                                $roleClass = 'bg-blue-200 text-blue-900';
+                                            } else {
+                                                $roleClass = 'bg-gray-200 text-gray-800';
+                                            }
+                                        @endphp
+
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $roleClass }}">
                                             {{ ucfirst($user->role) }}
                                         </span>
                                     </td>

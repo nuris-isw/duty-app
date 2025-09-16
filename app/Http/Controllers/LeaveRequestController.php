@@ -45,7 +45,7 @@ class LeaveRequestController extends Controller
         $rules = [
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'reason' => 'nullable|string',
+            'reason' => 'required|string',
         ];
         if (!$leaveType->bisa_retroaktif) {
             $rules['start_date'] .= '|after_or_equal:today';
@@ -62,7 +62,6 @@ class LeaveRequestController extends Controller
             $duration = $startDate->diffInDaysFiltered(function (Carbon $date) {
                 return !$date->isWeekend(); // Hanya hitung hari kerja
             }, $endDate) + ($startDate->isWeekend() ? 0 : 1);
-
 
             $quota = UserLeaveQuota::firstOrCreate(
                 [
@@ -87,7 +86,18 @@ class LeaveRequestController extends Controller
             $documentPath = $request->file('dokumen_pendukung')->store('attachments', 'public');
         }
 
-        // 5. Simpan Pengajuan
+        // 5. Tentukan Status Awal (Auto-Approve untuk Atasan Tertinggi)
+        $statusDefault = 'pending';
+        $approvedBy = null;
+        $approvedAt = null;
+        
+        if (is_null($user->atasan_id)) {
+            $statusDefault = 'approved';
+            $approvedBy = $user->id;
+            $approvedAt = now();
+        }
+
+        // 6. Simpan Pengajuan
         $leaveRequest = LeaveRequest::create([
             'user_id' => $user->id,
             'leave_type' => $leaveType->nama_cuti,
@@ -95,13 +105,17 @@ class LeaveRequestController extends Controller
             'end_date' => $validatedData['end_date'],
             'reason' => $validatedData['reason'],
             'dokumen_pendukung' => $documentPath,
+            'status' => $statusDefault,
+            'approved_by' => $approvedBy,
+            'approved_at' => $approvedAt,
         ]);
 
-        // 6. Kirim Email ke Atasan
-        if ($user->atasan_id) {
+        // 7. Kirim Email ke Atasan (jika tidak auto-approve)
+        if ($statusDefault === 'pending' && $user->atasan_id) {
             Mail::to($user->superior->email)->send(new NewLeaveRequestForSuperior($leaveRequest));
         }
 
+        // 8. Redirect ke dashboard dengan pesan sukses
         return redirect()->route('dashboard')->with('success', 'Pengajuan cuti berhasil dikirim.');
     }
 
