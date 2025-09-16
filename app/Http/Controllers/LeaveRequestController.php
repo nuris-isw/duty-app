@@ -124,6 +124,9 @@ class LeaveRequestController extends Controller
      */
     public function approve(LeaveRequest $leaveRequest)
     {
+        // Panggil Policy untuk otorisasi
+        $this->authorize('update', $leaveRequest);
+
         $leaveRequest->update([
             'status' => 'approved',
             'approved_by' => Auth::id(),
@@ -164,6 +167,9 @@ class LeaveRequestController extends Controller
      */
     public function reject(LeaveRequest $leaveRequest)
     {
+        // Panggil Policy untuk otorisasi
+        $this->authorize('update', $leaveRequest);
+        
         $leaveRequest->update([
             'status' => 'rejected',
             'approved_by' => Auth::id(),
