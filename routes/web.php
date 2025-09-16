@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\UnitKerjaController;
 use App\Http\Controllers\Admin\JabatanController;
 use App\Http\Controllers\Admin\LeaveTypeController;
 use App\Http\Controllers\UserLeaveQuotaController;
+use App\Http\Controllers\CalendarController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
 
@@ -39,6 +40,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/leave-requests/{leaveRequest}/print', [LeaveRequestController::class, 'print'])->name('leave-requests.print');
     // Route untuk mengambil sisa kuota via JavaScript
     Route::get('/leave-quotas/{leaveTypeId}', [UserLeaveQuotaController::class, 'show'])->name('leave-quotas.show');
+    // Route untuk menampilkan halaman kalender
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+    // Route API untuk data event kalender
+    Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

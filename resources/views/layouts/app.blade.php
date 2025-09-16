@@ -11,6 +11,8 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        {{-- Tambahkan Library FullCalendar --}}
+        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen flex flex-col bg-neutral-100 dark:bg-neutral-900">
@@ -32,5 +34,7 @@
                 &copy; {{ date('Y') }} {{ config('app.name') }}. Dikembangkan oleh Pusat Perencanaan, Inovasi, dan Pengembangan Strategis PERPENAS Banyuwangi.
             </footer>
         </div>
+
+        @stack('scripts')
     </body>
 </html>

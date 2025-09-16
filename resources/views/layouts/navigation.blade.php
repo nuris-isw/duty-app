@@ -41,6 +41,10 @@
                         </x-dropdown>
                     </div>
 
+                    <x-nav-link :href="route('calendar.index')" :active="request()->routeIs('calendar.index')">
+                        {{ __('Kalender Cuti') }}
+                    </x-nav-link>
+
                     <x-nav-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.*')">
                         {{ __('Laporan') }}
                     </x-nav-link>
