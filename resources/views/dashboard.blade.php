@@ -65,7 +65,10 @@
                             <thead class="bg-neutral-100 dark:bg-neutral-900">
                                 <tr class="divide-x divide-neutral-200 dark:divide-neutral-700">
                                     <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Nama Pemohon</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Jenis Cuti</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Alasan</th>
                                     <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Tanggal</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Dokumen</th>
                                     <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
@@ -73,7 +76,18 @@
                                 @foreach ($subordinatePendingRequests as $request)
                                     <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $request->user->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ $request->leave_type }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ $request->reason }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">{{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            @if ($request->dokumen_pendukung)
+                                                <a href="{{ asset('storage/' . $request->dokumen_pendukung) }}" target="_blank" class="text-blue-600 hover:underline">
+                                                    Lihat
+                                                </a>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center justify-center space-x-2">
                                                 <form action="{{ route('leave-requests.approve', $request) }}" method="POST">@csrf @method('PATCH')<x-primary-button class="!py-1.5 !px-3 !text-xs">{{ __('Setujui') }}</x-primary-button></form>
@@ -98,6 +112,7 @@
                         <thead class="bg-neutral-100 dark:bg-neutral-900">
                             <tr class="divide-x divide-neutral-200 dark:divide-neutral-700">
                                 <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Jenis Cuti</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Alasan</th>
                                 <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Tanggal</th>
                                 <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Status</th>
                                 <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Aksi</th>
@@ -107,6 +122,7 @@
                             @forelse ($myLeaveRequests as $request)
                                 <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
                                     <td class="px-6 py-4 whitespace-nowrap">{{ $request->leave_type }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $request->reason }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">{{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
                                     <td class="px-6 py-4 text-center">
                                         @php $statusClass = ['pending' => 'bg-yellow-100 text-yellow-800', 'approved' => 'bg-green-100 text-green-800', 'rejected' => 'bg-red-100 text-red-800'][$request->status] ?? 'bg-gray-100 text-gray-800'; @endphp
@@ -128,23 +144,42 @@
 
             @if (Auth::user()->role === 'atasan' && $subordinateHistoryRequests->isNotEmpty())
                 <div class="bg-white dark:bg-neutral-800 shadow-md rounded-2xl p-6 overflow-hidden">
-                    <h3 class="font-semibold text-lg text-brand-dark mb-4">Riwayat Pengajuan Pegawai</h3>
+                    <h3 class="font-semibold text-lg text-neutral-800 dark:text-neutral-100 mb-4">Riwayat Pengajuan Pegawai</h3>
                     <div class="overflow-x-auto border border-neutral-200 dark:border-neutral-700 rounded-lg">
-                        <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+                        <table class="min-w-full text-sm">
                             <thead class="bg-neutral-100 dark:bg-neutral-900">
                                 <tr class="divide-x divide-neutral-200 dark:divide-neutral-700">
                                     <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Nama Pemohon</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Jenis Cuti</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Alasan</th>
                                     <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Tanggal</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Dokumen</th>
                                     <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Status</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
+                            <tbody class="bg-white divide-y divide-neutral-200 dark:divide-neutral-700">
                                 @foreach ($subordinateHistoryRequests as $request)
                                     <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $request->user->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ $request->leave_type }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ $request->reason }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            @if ($request->dokumen_pendukung)
+                                                <a href="{{ asset('storage/' . $request->dokumen_pendukung) }}" target="_blank" class="text-blue-600 hover:underline">
+                                                    Lihat
+                                                </a>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td class="px-6 py-4 text-center">
-                                            @php $statusClass = ['approved' => 'bg-green-100 text-green-800', 'rejected' => 'bg-red-100 text-red-800'][$request->status] ?? 'bg-gray-100 text-gray-800'; @endphp
+                                            @php 
+                                                $statusClass = [
+                                                    'approved' => 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', 
+                                                    'rejected' => 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
+                                                ][$request->status] ?? 'bg-gray-100 text-gray-800'; 
+                                            @endphp
                                             <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">{{ ucfirst($request->status) }}</span>
                                         </td>
                                     </tr>

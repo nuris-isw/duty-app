@@ -13,7 +13,11 @@
                     method="POST" 
                     action="{{ route('leave-requests.store') }}" 
                     enctype="multipart/form-data"
-                    x-data="{ selectedLeaveTypeName: '{{ old('leave_type_id') ? App\Models\LeaveType::find(old('leave_type_id'))->nama_cuti : '' }}' }"
+                    x-data="{ 
+                        selectedLeaveTypeName: '{{ old('leave_type_id') ? App\Models\LeaveType::find(old('leave_type_id'))->nama_cuti : '' }}',
+                        remainingQuota: '-',
+                        quotaClass: 'text-neutral-600 dark:text-neutral-400 font-bold'
+                    }"
                 >
                     @csrf
 
@@ -26,13 +30,42 @@
                                 id="leave_type_id" 
                                 class="block mt-1 w-full" 
                                 required
-                                x-on:change="selectedLeaveTypeName = $event.target.options[$event.target.selectedIndex].text.trim()"
+                                x-on:change="
+                                    selectedLeaveTypeName = $event.target.options[$event.target.selectedIndex].text.trim();
+                                    
+                                    const leaveTypeId = $event.target.value;
+                                    if (leaveTypeId) {
+                                        fetch(`/leave-quotas/${leaveTypeId}`)
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                remainingQuota = data.sisa_kuota;
+                                                
+                                                if (parseInt(data.sisa_kuota) > 3) {
+                                                    quotaClass = 'text-green-600 dark:text-green-400 font-bold';
+                                                } else if (parseInt(data.sisa_kuota) > 0) {
+                                                    quotaClass = 'text-yellow-600 dark:text-yellow-400 font-bold';
+                                                } else if (data.sisa_kuota !== '-') {
+                                                    quotaClass = 'text-red-600 dark:text-red-400 font-bold';
+                                                } else {
+                                                    quotaClass = 'text-neutral-600 dark:text-neutral-400 font-bold';
+                                                }
+                                            });
+                                    } else {
+                                        remainingQuota = '-';
+                                        quotaClass = 'text-neutral-600 dark:text-neutral-400 font-bold';
+                                    }
+                                "
                             >
                                 <option value="">-- Pilih Jenis Cuti --</option>
                                 @foreach ($leaveTypes as $type)
                                     <option value="{{ $type->id }}" @selected(old('leave_type_id') == $type->id)>{{ $type->nama_cuti }}</option>
                                 @endforeach
                             </x-select-input>
+                            
+                            {{-- Tampilan Sisa Kuota --}}
+                            <div x-show="remainingQuota !== '-'" x-transition class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                                Sisa Kuota: <span x-text="remainingQuota" :class="quotaClass"></span>
+                            </div>
                         </div>
 
                         {{-- Tanggal Mulai & Selesai --}}
@@ -54,11 +87,11 @@
                                 id="dokumen_pendukung" 
                                 class="block w-full text-sm rounded-md shadow-sm cursor-pointer
                                     border border-neutral-300 bg-neutral-50 text-neutral-600
-                                    dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400
-                                    focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand
+                                    dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400
+                                    focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
                                     file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
-                                    file:text-sm file:font-semibold file:bg-brand file:text-white
-                                    hover:file:bg-brand-dark dark:hover:file:bg-brand-dark" 
+                                    file:text-sm file:font-semibold file:bg-indigo-600 file:text-white
+                                    hover:file:bg-indigo-700" 
                                 type="file" 
                                 name="dokumen_pendukung"
                                 x-bind:required="selectedLeaveTypeName === 'Izin Sakit'"

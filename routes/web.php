@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UnitKerjaController;
 use App\Http\Controllers\Admin\JabatanController;
+use App\Http\Controllers\UserLeaveQuotaController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
 
@@ -35,6 +36,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave-requests.reject');
     // Route untuk mencetak PDF
     Route::get('/leave-requests/{leaveRequest}/print', [LeaveRequestController::class, 'print'])->name('leave-requests.print');
+    // Route untuk mengambil sisa kuota via JavaScript
+    Route::get('/leave-quotas/{leaveTypeId}', [UserLeaveQuotaController::class, 'show'])->name('leave-quotas.show');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
