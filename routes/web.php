@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UnitKerjaController;
 use App\Http\Controllers\Admin\JabatanController;
+use App\Http\Controllers\Admin\LeaveTypeController;
 use App\Http\Controllers\UserLeaveQuotaController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
@@ -47,6 +48,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
     Route::resource('unit-kerja', UnitKerjaController::class);
     Route::resource('jabatan', JabatanController::class);
+    Route::resource('leave-types', LeaveTypeController::class);
 });
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');

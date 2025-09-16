@@ -93,11 +93,23 @@
 <body>
     {{-- Menggunakan path absolut ke gambar di folder public --}}
     <div id="header">
-        <img src="{{ public_path('images/letter-header.png') }}" alt="Header Laporan">
+        @php
+            $path = public_path('images/letter-header.png');
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        @endphp
+        <img src="{{ $base64 }}" alt="Header Laporan">
     </div>
 
     <div id="footer">
-        <img src="{{ public_path('images/letter-footer.png') }}" alt="Footer Laporan">
+        @php
+            $path = public_path('images/letter-footer.png');
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        @endphp
+        <img src="{{ $base64 }}" alt="Footer Laporan">
     </div>
 
     <div class="content">

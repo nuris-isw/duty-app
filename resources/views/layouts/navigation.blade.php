@@ -34,6 +34,9 @@
                                 <x-dropdown-link :href="route('admin.jabatan.index')" :active="request()->routeIs('admin.jabatan.*')">
                                     {{ __('Manajemen Jabatan') }}
                                 </x-dropdown-link>
+                                <x-dropdown-link :href="route('admin.leave-types.index')" :active="request()->routeIs('admin.leave-types.*')">
+                                    {{ __('Manajemen Jenis Cuti') }}
+                                </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
                     </div>
