@@ -41,12 +41,12 @@
                         </x-dropdown>
                     </div>
 
-                    <x-nav-link :href="route('calendar.index')" :active="request()->routeIs('calendar.index')">
-                        {{ __('Kalender Cuti') }}
-                    </x-nav-link>
-
                     <x-nav-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.*')">
                         {{ __('Laporan') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('calendar.index')" :active="request()->routeIs('calendar.index')">
+                        {{ __('Kalender Cuti') }}
                     </x-nav-link>
                     @endcan
                 </div>
@@ -92,7 +92,34 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            {{-- Tambahkan link responsif untuk admin di sini jika perlu --}}
+
+            @can('is-admin')
+                <div class="pt-2 pb-1 border-t border-neutral-200 dark:border-neutral-700">
+                    <div class="px-4 mt-2 mb-1">
+                        <div class="font-medium text-base text-neutral-800 dark:text-neutral-200">Pengaturan</div>
+                    </div>
+                    <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                        {{ __('Manajemen User') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.unit-kerja.index')" :active="request()->routeIs('admin.unit-kerja.*')">
+                        {{ __('Manajemen Unit Kerja') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.jabatan.index')" :active="request()->routeIs('admin.jabatan.*')">
+                        {{ __('Manajemen Jabatan') }}
+                    </x-responsive-nav-link>
+                     <x-responsive-nav-link :href="route('admin.leave-types.index')" :active="request()->routeIs('admin.leave-types.*')">
+                        {{ __('Manajemen Jenis Cuti') }}
+                    </x-responsive-nav-link>
+                </div>
+                <div class="pt-2 pb-1 border-t border-neutral-200 dark:border-neutral-700">
+                     <x-responsive-nav-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.*')">
+                        {{ __('Laporan') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('calendar.index')" :active="request()->routeIs('calendar.index')">
+                        {{ __('Kalender Cuti') }}
+                    </x-responsive-nav-link>
+                </div>
+            @endcan
         </div>
 
         <div class="pt-4 pb-1 border-t border-neutral-200 dark:border-neutral-700">

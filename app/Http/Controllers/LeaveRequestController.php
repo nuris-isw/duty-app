@@ -9,6 +9,7 @@ use App\Models\UserLeaveQuota;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Mail\LeaveRequestStatusUpdated;
 use App\Mail\NewLeaveRequestForSuperior;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -16,6 +17,7 @@ use Carbon\Carbon;
 
 class LeaveRequestController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Menampilkan form untuk membuat pengajuan baru.
      */

@@ -13,6 +13,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $today = Carbon::today();
         
         // --- Inisialisasi variabel untuk dikirim ke view ---
         // Selalu ambil riwayat pengajuan milik user yang login
@@ -66,6 +67,20 @@ class DashboardController extends Controller
                                         ->get();
         }
 
+        // AMBIL DATA PEGAWAI YANG CUTI HARI INI DI UNIT KERJA YANG SAMA
+        $currentlyOnLeave = collect(); // Default koleksi kosong
+        if ($user->unit_kerja_id) {
+            $currentlyOnLeave = LeaveRequest::with('user')
+                ->where('status', 'approved')
+                ->where('start_date', '<=', $today)
+                ->where('end_date', '>=', $today)
+                ->whereHas('user', function ($query) use ($user) {
+                    $query->where('unit_kerja_id', $user->unit_kerja_id)
+                        ->where('id', '!=', $user->id); // Tidak menampilkan diri sendiri
+                })
+                ->get();
+        }
+
         // Kirim semua data ke view. Variabel yang tidak relevan akan menjadi koleksi kosong.
         return view('dashboard', [
             'myLeaveRequests' => $myLeaveRequests,
@@ -73,6 +88,7 @@ class DashboardController extends Controller
             'subordinateHistoryRequests' => $subordinateHistoryRequests, // <-- Kirim data baru
             'stats' => $stats,
             'upcomingLeaves' => $upcomingLeaves,
+            'currentlyOnLeave' => $currentlyOnLeave,
         ]);
     }
 }

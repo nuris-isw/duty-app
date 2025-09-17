@@ -15,6 +15,17 @@
                 </div>
             @endif
 
+            @if($currentlyOnLeave->isNotEmpty())
+                <div class="bg-blue-50 dark:bg-blue-900/50 border-l-4 border-blue-400 p-4 rounded-xl">
+                    <h4 class="font-semibold text-blue-800 dark:text-blue-200">Rekan Kerja yang Cuti/Izin Hari Ini</h4>
+                    <ul class="list-disc list-inside mt-2 text-sm text-blue-700 dark:text-blue-300">
+                        @foreach ($currentlyOnLeave as $leave)
+                            <li>{{ $leave->user->name }} ({{ $leave->leave_type }})</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             @if (Auth::user()->role === 'admin')
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <x-stat-card title="Total Pegawai" value="{{ $stats['total_pegawai'] }}" iconBgColor="bg-brand">
@@ -135,7 +146,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="4" class="px-6 py-10 text-center text-neutral-500">Anda belum memiliki riwayat pengajuan cuti.</td></tr>
+                                <tr><td colspan="5" class="px-6 py-10 text-center text-neutral-500">Anda belum memiliki riwayat pengajuan cuti.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
