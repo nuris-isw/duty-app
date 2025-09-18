@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\LeaveRequest;
+use App\Models\UserLeaveQuota;
 
 class User extends Authenticatable
 {
@@ -84,5 +85,13 @@ class User extends Authenticatable
     public function jabatan()
     {
         return $this->belongsTo(Jabatan::class);
+    }
+
+    /**
+     * Mendefinisikan relasi one-to-many ke UserLeaveQuota.
+     */
+    public function userLeaveQuotas()
+    {
+        return $this->hasMany(UserLeaveQuota::class);
     }
 }

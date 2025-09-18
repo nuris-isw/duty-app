@@ -43,6 +43,9 @@
                                     Role
                                 </th>
                                 <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                                    Sisa Cuti Tahunan
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
                                     Aksi
                                 </th>
                             </tr>
@@ -67,6 +70,20 @@
                                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $roleClass }}">
                                             {{ ucfirst($user->role) }}
                                         </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        {{-- ▼▼▼ LOGIKA BARU UNTUK SISA CUTI ▼▼▼ --}}
+                                        @php
+                                            // Ambil kuota yang sudah di-load
+                                            $quota = $user->userLeaveQuotas->first();
+                                            // Ambil jatah yang sudah diambil, default 0 jika belum ada record
+                                            $jumlahDiambil = $quota->jumlah_diambil ?? 0;
+                                            // Ambil kuota default dari jenis cuti
+                                            $kuotaDefault = $annualLeaveType->kuota ?? 0;
+                                            $sisaCuti = $kuotaDefault - $jumlahDiambil;
+                                        @endphp
+                                        {{ $sisaCuti }} hari
+                                        {{-- ▲▲▲ SELESAI ▲▲▲ --}}
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-center space-x-3">

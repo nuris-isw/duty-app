@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UnitKerjaController;
 use App\Http\Controllers\Admin\JabatanController;
 use App\Http\Controllers\Admin\LeaveTypeController;
+use App\Http\Controllers\Admin\LeaveRequestController as AdminLeaveRequestController;
 use App\Http\Controllers\UserLeaveQuotaController;
 use App\Http\Controllers\CalendarController;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +55,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('unit-kerja', UnitKerjaController::class);
     Route::resource('jabatan', JabatanController::class);
     Route::resource('leave-types', LeaveTypeController::class);
+    Route::get('/leave-requests/{leaveRequest}/edit', [AdminLeaveRequestController::class, 'edit'])->name('leave-requests.edit');
+    Route::patch('/leave-requests/{leaveRequest}', [AdminLeaveRequestController::class, 'update'])->name('leave-requests.update');
+    Route::delete('/leave-requests/{leaveRequest}', [AdminLeaveRequestController::class, 'destroy'])->name('leave-requests.destroy');
 });
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');

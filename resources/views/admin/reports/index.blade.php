@@ -7,6 +7,11 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @if (session('success'))
+                <div class="mb-6 p-4 bg-green-50 text-green-700 border-l-4 border-green-400 rounded-lg" role="alert">
+                    {{ session('success') }}
+                </div>
+            @endif
             <div class="bg-white dark:bg-neutral-800 shadow-md rounded-2xl p-6 sm:p-8 border border-neutral-200 dark:border-neutral-700">
                 
                 {{-- Filter Bar yang Responsif --}}
@@ -77,6 +82,7 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Jenis Cuti</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Tanggal</th>
                                 <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
@@ -98,10 +104,20 @@
                                             {{ ucfirst($request->status) }}
                                         </span>
                                     </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center justify-center space-x-3">
+                                            <a href="{{ route('admin.leave-requests.edit', $user->id) }}" class="px-3 py-1.5 text-xs font-medium text-white bg-neutral-600 rounded-md hover:bg-neutral-700 transition">Edit</a>
+                                            <form action="{{ route('admin.leave-requests.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pengajuan ini?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition">Hapus</button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-10 text-center text-sm text-neutral-500">
+                                    <td colspan="6" class="px-6 py-10 text-center text-sm text-neutral-500">
                                         Tidak ada data yang cocok dengan filter Anda.
                                     </td>
                                 </tr>

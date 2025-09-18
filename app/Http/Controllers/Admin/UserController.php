@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Jabatan;
+use App\Models\LeaveType;
 use App\Models\UnitKerja;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -18,10 +19,25 @@ class UserController extends Controller
      */
     public function index()
     {
-        // Ambil semua data user dari database
-        $users = User::all();
+        $currentYear = now()->year;
+        // Cari ID untuk jenis cuti 'Cuti Tahunan'
+        $annualLeaveType = LeaveType::where('nama_cuti', 'Cuti Tahunan')->first();
+
+        $users = User::with(['jabatan', 'unitKerja', 
+            // Ambil data kuota yang relevan saja (Cuti Tahunan untuk tahun ini)
+            'userLeaveQuotas' => function ($query) use ($annualLeaveType, $currentYear) {
+                if ($annualLeaveType) {
+                    $query->where('leave_type_id', $annualLeaveType->id)
+                          ->where('tahun', $currentYear);
+                }
+            }
+        ])->latest()->get();
+
         // Kirim data user ke view
-        return view('admin.users.index', ['users' => $users]);
+        return view('admin.users.index', [
+            'users' => $users,
+            'annualLeaveType' => $annualLeaveType
+        ]);
     }
 
     public function create()
