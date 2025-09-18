@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\LeaveRequest;
 
-class LeaveRequestStatusUpdated extends Mailable
+class LeaveRequestStatusUpdated extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

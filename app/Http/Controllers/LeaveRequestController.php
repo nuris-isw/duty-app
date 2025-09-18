@@ -114,7 +114,7 @@ class LeaveRequestController extends Controller
 
         // 7. Kirim Email ke Atasan (jika tidak auto-approve)
         if ($statusDefault === 'pending' && $user->atasan_id) {
-            Mail::to($user->superior->email)->send(new NewLeaveRequestForSuperior($leaveRequest));
+            Mail::to($user->superior->email)->queue(new NewLeaveRequestForSuperior($leaveRequest));
         }
 
         // 8. Redirect ke dashboard dengan pesan sukses
@@ -160,25 +160,29 @@ class LeaveRequestController extends Controller
             $quota->increment('jumlah_diambil', $duration);
         }
 
-        Mail::to($leaveRequest->user->email)->send(new LeaveRequestStatusUpdated($leaveRequest));
+        Mail::to($leaveRequest->user->email)->queue(new LeaveRequestStatusUpdated($leaveRequest));
         return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil disetujui.');
     }
 
     /**
      * Menolak pengajuan cuti.
      */
-    public function reject(LeaveRequest $leaveRequest)
+    public function reject(Request $request, LeaveRequest $leaveRequest) // Tambahkan Request
     {
-        // Panggil Policy untuk otorisasi
         $this->authorize('update', $leaveRequest);
         
+        $validatedData = $request->validate([
+            'rejection_reason' => 'required|string|max:500', // Validasi alasan
+        ]);
+
         $leaveRequest->update([
             'status' => 'rejected',
+            'rejection_reason' => $validatedData['rejection_reason'], // Simpan alasan
             'approved_by' => Auth::id(),
             'approved_at' => now(),
         ]);
 
-        Mail::to($leaveRequest->user->email)->send(new LeaveRequestStatusUpdated($leaveRequest));
+        Mail::to($leaveRequest->user->email)->queue(new LeaveRequestStatusUpdated($leaveRequest));
         return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil ditolak.');
     }
 

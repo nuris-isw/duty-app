@@ -17,6 +17,13 @@
         Status baru pengajuan Anda adalah: 
         <strong style="text-transform: capitalize;">{{ $leaveRequest->status }}</strong>
     </p>
+
+    @if ($leaveRequest->status === 'rejected' && $leaveRequest->rejection_reason)
+        <p style="padding: 10px; background-color: #ffeeee; border: 1px solid #ffdddd;">
+            <strong>Alasan Penolakan:</strong> {{ $leaveRequest->rejection_reason }}
+        </p>
+    @endif
+    
     <p>
         Terima kasih.
     </p>

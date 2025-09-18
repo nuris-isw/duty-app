@@ -102,7 +102,23 @@
                                         <td class="px-6 py-4">
                                             <div class="flex items-center justify-center space-x-2">
                                                 <form action="{{ route('leave-requests.approve', $request) }}" method="POST">@csrf @method('PATCH')<x-primary-button class="!py-1.5 !px-3 !text-xs">{{ __('Setujui') }}</x-primary-button></form>
-                                                <form action="{{ route('leave-requests.reject', $request) }}" method="POST">@csrf @method('PATCH')<x-danger-button class="!py-1.5 !px-3 !text-xs">{{ __('Tolak') }}</x-danger-button></form>
+                                                <form 
+                                                    x-data="{ reason: '' }"
+                                                    x-on:submit.prevent="
+                                                        reason = prompt('Silakan masukkan alasan penolakan:');
+                                                        if (reason) {
+                                                            $refs.reasonInput.value = reason;
+                                                            $el.submit();
+                                                        }
+                                                    "
+                                                    action="{{ route('leave-requests.reject', $request) }}" 
+                                                    method="POST"
+                                                >
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="hidden" name="rejection_reason" x-ref="reasonInput">
+                                                    <x-danger-button type="submit" class="!py-1.5 !px-3 !text-xs">{{ __('Tolak') }}</x-danger-button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -203,3 +219,20 @@
         </div>
     </div>
 </x-app-layout>
+
+@push('scripts')
+<script>
+    function handleRejection(form) {
+        const reason = prompt('Silakan masukkan alasan penolakan:');
+        
+        // Jika user mengisi alasan dan menekan OK
+        if (reason) {
+            form.querySelector('input[name="rejection_reason"]').value = reason;
+            return true; // Lanjutkan submit form
+        }
+        
+        // Jika user menekan Cancel atau tidak mengisi apa-apa
+        return false; // Batalkan submit form
+    }
+</script>
+@endpush
