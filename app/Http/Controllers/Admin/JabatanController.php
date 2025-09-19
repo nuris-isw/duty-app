@@ -32,7 +32,14 @@ class JabatanController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'nama_jabatan' => ['required', 'string', 'max:255', Rule::unique('jabatans')->where('bidang_kerja', $request->bidang_kerja)->ignore($jabatan->id)],
+            'nama_jabatan' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('jabatans')->where(function ($query) use ($request) {
+                    return $query->where('bidang_kerja', $request->bidang_kerja);
+                }),
+            ],
             'alias' => 'nullable|string|max:255',
             'bidang_kerja' => 'nullable|string|max:255',
         ]);

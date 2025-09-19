@@ -16,8 +16,13 @@ class CalendarController extends Controller
     // Method API untuk mengirim data cuti yang sudah disetujui
     public function events()
     {
+        $user = auth()->user();
+
         $approvedLeaves = LeaveRequest::with('user')
             ->where('status', 'approved')
+            ->whereHas('user', function ($query) use ($user) {
+                $query->where('unit_kerja_id', $user->unit_kerja_id);
+            })
             ->get();
 
         $events = $approvedLeaves->map(function ($leave) {

@@ -17,7 +17,7 @@ class LeaveTypeSeeder extends Seeder
         LeaveType::query()->delete();
 
         LeaveType::create([
-            'nama_cuti' => 'Cuti Tahunan',
+            'nama_cuti' => 'Tahunan',
             'kuota' => 15,
             'satuan' => 'hari',
             'periode_reset' => 'tahunan',
@@ -26,7 +26,7 @@ class LeaveTypeSeeder extends Seeder
         ]);
 
         LeaveType::create([
-            'nama_cuti' => 'Cuti Melahirkan',
+            'nama_cuti' => 'Melahirkan',
             'kuota' => 90, // Durasi dalam hari
             'satuan' => 'hari', // Tetap hari, tapi akan kita batasi 1x per tahun di logika
             'periode_reset' => 'tidak_ada',
@@ -35,7 +35,7 @@ class LeaveTypeSeeder extends Seeder
         ]);
         
         LeaveType::create([
-            'nama_cuti' => 'Cuti Ibadah',
+            'nama_cuti' => 'Ibadah',
             'kuota' => 40, // Durasi dalam hari
             'satuan' => 'hari', // Sama seperti cuti melahirkan
             'periode_reset' => 'tidak_ada',
@@ -44,7 +44,7 @@ class LeaveTypeSeeder extends Seeder
         ]);
 
         LeaveType::create([
-            'nama_cuti' => 'Izin Sakit',
+            'nama_cuti' => 'Sakit',
             'kuota' => 0, // Kuota 0 berarti tidak terbatas
             'satuan' => 'hari',
             'periode_reset' => 'tidak_ada',
