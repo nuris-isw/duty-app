@@ -22,14 +22,22 @@
                     </a>
                 </div>
 
-                <div class="w-full sm:max-w-sm mt-6 p-8 bg-white dark:bg-neutral-900 shadow-md overflow-hidden sm:rounded-lg border border-neutral-200 dark:border-neutral-800">
+                <div class="w-full sm:max-w-sm mt-6 p-8 
+                            bg-white dark:bg-neutral-900 
+                            shadow-md dark:shadow-black/50 
+                            overflow-hidden sm:rounded-lg 
+                            border border-neutral-200 dark:border-neutral-800">
                     {{ $slot }}
                 </div>
             </main>
 
-            <footer class="w-full py-4 text-center text-xs bg-brand text-white">
-                &copy; {{ date('Y') }} {{ config('app.name') }}. Dikembangkan oleh Pusat Perencanaan, Inovasi, dan Pengembangan Strategis PERPENAS Banyuwangi.
+            <footer class="w-full py-4 text-center text-xs 
+               bg-brand dark:bg-brand/90 
+               text-white dark:text-neutral-100">
+                &copy; {{ date('Y') }} {{ config('app.name') }}. 
+                Dikembangkan oleh Pusat Perencanaan, Inovasi, dan Pengembangan Strategis PERPENAS Banyuwangi.
             </footer>
+
 
         </div>
     </body>
