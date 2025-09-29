@@ -13,11 +13,8 @@
                     method="POST" 
                     action="{{ route('leave-requests.store') }}" 
                     enctype="multipart/form-data"
-                    x-data="{ 
-                        selectedLeaveTypeName: '{{ old('leave_type_id') ? App\Models\LeaveType::find(old('leave_type_id'))->nama_cuti : '' }}',
-                        remainingQuota: '-',
-                        quotaClass: 'text-neutral-600 dark:text-neutral-400 font-bold'
-                    }"
+                    x-data="leaveForm()"
+                    x-init="init()"
                 >
                     @csrf
 
@@ -30,40 +27,17 @@
                                 id="leave_type_id" 
                                 class="block mt-1 w-full" 
                                 required
-                                x-on:change="
-                                    selectedLeaveTypeName = $event.target.options[$event.target.selectedIndex].text.trim();
-                                    
-                                    const leaveTypeId = $event.target.value;
-                                    if (leaveTypeId) {
-                                        fetch(`/leave-quotas/${leaveTypeId}`)
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                remainingQuota = data.sisa_kuota;
-                                                
-                                                if (parseInt(data.sisa_kuota) > 3) {
-                                                    quotaClass = 'text-green-600 dark:text-green-400 font-bold';
-                                                } else if (parseInt(data.sisa_kuota) > 0) {
-                                                    quotaClass = 'text-yellow-600 dark:text-yellow-400 font-bold';
-                                                } else if (data.sisa_kuota !== '-') {
-                                                    quotaClass = 'text-red-600 dark:text-red-400 font-bold';
-                                                } else {
-                                                    quotaClass = 'text-neutral-600 dark:text-neutral-400 font-bold';
-                                                }
-                                            });
-                                    } else {
-                                        remainingQuota = '-';
-                                        quotaClass = 'text-neutral-600 dark:text-neutral-400 font-bold';
-                                    }
-                                "
+                                x-model="selectedLeaveTypeId"
+                                x-on:change="updateForm()"
                             >
-                                <option value="">-- Pilih Jenis Cuti --</option>
+                                <option value="" disabled>-- Pilih Jenis Cuti --</option>
                                 @foreach ($leaveTypes as $type)
-                                    <option value="{{ $type->id }}" @selected(old('leave_type_id') == $type->id)>{{ $type->nama_cuti }}</option>
+                                    <option value="{{ $type->id }}">{{ $type->nama_cuti }}</option>
                                 @endforeach
                             </x-select-input>
                             
                             {{-- Tampilan Sisa Kuota --}}
-                            <div x-show="remainingQuota !== '-'" x-transition class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                            <div x-show="remainingQuota !== '-'" x-transition class="mt-2 text-sm">
                                 Sisa Kuota: <span x-text="remainingQuota" :class="quotaClass"></span>
                             </div>
                         </div>
@@ -81,7 +55,7 @@
                         </div>
                         
                         {{-- Dokumen Pendukung (muncul kondisional) --}}
-                        <div x-show="selectedLeaveTypeName === 'Izin Sakit'" x-transition class="md:col-span-2">
+                        <div x-show="requiresDocument" x-transition class="md:col-span-2">
                             <x-input-label for="dokumen_pendukung" :value="__('Dokumen Pendukung (Surat Sakit, dll.)')" />
                             <input 
                                 id="dokumen_pendukung" 
@@ -94,20 +68,20 @@
                                     hover:file:bg-indigo-700" 
                                 type="file" 
                                 name="dokumen_pendukung"
-                                x-bind:required="selectedLeaveTypeName === 'Izin Sakit'"
+                                x-bind:required="requiresDocument"
                             />
                             <x-input-error :messages="$errors->get('dokumen_pendukung')" class="mt-2" />
                         </div>
                         
                         {{-- Alasan (muncul kondisional) --}}
-                        <div x-show="selectedLeaveTypeName !== 'Izin Sakit' && selectedLeaveTypeName !== ''" x-transition class="md:col-span-2">
+                        <div x-show="!requiresDocument && selectedLeaveTypeId" x-transition class="md:col-span-2">
                             <x-input-label for="reason" :value="__('Alasan')" />
                             <x-textarea-input 
                                 name="reason" 
                                 id="reason" 
                                 rows="4" 
                                 class="block mt-1 w-full" 
-                                x-bind:required="selectedLeaveTypeName !== 'Izin Sakit' && selectedLeaveTypeName !== ''"
+                                x-bind:required="!requiresDocument && selectedLeaveTypeId"
                             >{{ old('reason') }}</x-textarea-input>
                             <x-input-error :messages="$errors->get('reason')" class="mt-2" />
                         </div>
@@ -125,4 +99,49 @@
             </div>
         </div>
     </div>
+    
+    @push('scripts')
+    <script>
+        function leaveForm() {
+            return {
+                selectedLeaveTypeId: '{{ old('leave_type_id', '') }}',
+                // Kirim semua data leaveTypes ke JavaScript sebagai objek
+                leaveTypes: {!! json_encode($leaveTypes->keyBy('id')) !!},
+                requiresDocument: false,
+                remainingQuota: '-',
+                quotaClass: 'font-bold text-neutral-600 dark:text-neutral-400',
+
+                init() {
+                    // Jalankan update saat halaman pertama kali dimuat (untuk handle old input/validation error)
+                    if(this.selectedLeaveTypeId) {
+                        this.updateForm();
+                    }
+                },
+
+                updateForm() {
+                    if (!this.selectedLeaveTypeId) {
+                        this.requiresDocument = false;
+                        this.remainingQuota = '-';
+                        return;
+                    }
+                    
+                    const selectedType = this.leaveTypes[this.selectedLeaveTypeId];
+                    this.requiresDocument = selectedType.memerlukan_dokumen == 1;
+
+                    // Ambil data kuota
+                    fetch(`/leave-quotas/${this.selectedLeaveTypeId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.remainingQuota = data.sisa_kuota;
+                            // Logika warna
+                            if (parseInt(data.sisa_kuota) > 3) this.quotaClass = 'font-bold text-green-600 dark:text-green-400';
+                            else if (parseInt(data.sisa_kuota) > 0) this.quotaClass = 'font-bold text-yellow-600 dark:text-yellow-400';
+                            else if (data.sisa_kuota !== '-') this.quotaClass = 'font-bold text-red-600 dark:text-red-400';
+                            else this.quotaClass = 'font-bold text-neutral-600 dark:text-neutral-400';
+                        });
+                }
+            }
+        }
+    </script>
+    @endpush
 </x-app-layout>

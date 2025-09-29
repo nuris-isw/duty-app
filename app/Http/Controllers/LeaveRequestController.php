@@ -112,6 +112,11 @@ class LeaveRequestController extends Controller
             'approved_at' => $approvedAt,
         ]);
 
+        // Potong kuota jika pengajuan di-auto-approve
+        if ($statusDefault === 'approved') {
+            $this->deductQuota($leaveRequest);
+        }
+
         // 7. Kirim Email ke Atasan (jika tidak auto-approve)
         if ($statusDefault === 'pending' && $user->atasan_id) {
             Mail::to($user->superior->email)->queue(new NewLeaveRequestForSuperior($leaveRequest));
@@ -136,29 +141,7 @@ class LeaveRequestController extends Controller
         ]);
 
         // Kurangi jatah cuti jika perlu
-        $leaveType = LeaveType::where('nama_cuti', $leaveRequest->leave_type)->first();
-        // Cek apakah jenis cuti ini memiliki kuota yang harus dikurangi
-        if ($leaveType && $leaveType->kuota > 0) {
-        // Hitung durasi cuti (hanya hari kerja)
-            $startDate = Carbon::parse($leaveRequest->start_date);
-            $endDate = Carbon::parse($leaveRequest->end_date);
-            $duration = $startDate->diffInDaysFiltered(function (Carbon $date) {
-                return !$date->isWeekend();
-            }, $endDate) + ($startDate->isWeekend() ? 0 : 1);
-
-            // Cari atau buat data kuota user untuk tahun ini
-            $quota = UserLeaveQuota::firstOrCreate(
-                [
-                    'user_id' => $leaveRequest->user_id, 
-                    'leave_type_id' => $leaveType->id, 
-                    'tahun' => $startDate->year
-                ],
-                ['jumlah_diambil' => 0]
-            );
-
-            // Tambahkan jumlah hari yang diambil
-            $quota->increment('jumlah_diambil', $duration);
-        }
+        $this->deductQuota($leaveRequest);
 
         Mail::to($leaveRequest->user->email)->queue(new LeaveRequestStatusUpdated($leaveRequest));
         return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil disetujui.');
@@ -167,7 +150,7 @@ class LeaveRequestController extends Controller
     /**
      * Menolak pengajuan cuti.
      */
-    public function reject(Request $request, LeaveRequest $leaveRequest) // Tambahkan Request
+    public function reject(Request $request, LeaveRequest $leaveRequest)
     {
         $this->authorize('update', $leaveRequest);
         
@@ -197,5 +180,36 @@ class LeaveRequestController extends Controller
 
         $pdf = PDF::loadView('leave-requests.pdf', ['leaveRequest' => $leaveRequest]);
         return $pdf->stream('surat-izin-'.$leaveRequest->id.'.pdf');
+    }
+    
+    /**
+     * Method privat untuk memotong kuota cuti.
+     */
+    private function deductQuota(LeaveRequest $leaveRequest)
+    {
+        $leaveType = LeaveType::where('nama_cuti', $leaveRequest->leave_type)->first();
+
+        // Cek apakah jenis cuti ini memiliki kuota yang harus dikurangi
+        if ($leaveType && $leaveType->kuota > 0) {
+            // Hitung durasi cuti (hanya hari kerja)
+            $startDate = Carbon::parse($leaveRequest->start_date);
+            $endDate = Carbon::parse($leaveRequest->end_date);
+            $duration = $startDate->diffInDaysFiltered(function (Carbon $date) {
+                return !$date->isWeekend();
+            }, $endDate) + ($startDate->isWeekend() ? 0 : 1);
+
+            // Cari atau buat data kuota user untuk tahun ini
+            $quota = UserLeaveQuota::firstOrCreate(
+                [
+                    'user_id' => $leaveRequest->user_id, 
+                    'leave_type_id' => $leaveType->id, 
+                    'tahun' => $startDate->year
+                ],
+                ['jumlah_diambil' => 0]
+            );
+
+            // Tambahkan jumlah hari yang diambil
+            $quota->increment('jumlah_diambil', $duration);
+        }
     }
 }

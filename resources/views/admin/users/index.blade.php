@@ -74,21 +74,24 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
                                         {{-- ▼▼▼ LOGIKA BARU UNTUK SISA CUTI ▼▼▼ --}}
                                         @php
-                                            // Ambil kuota yang sudah di-load
-                                            $quota = $user->userLeaveQuotas->first();
-                                            // Ambil jatah yang sudah diambil, default 0 jika belum ada record
-                                            $jumlahDiambil = $quota->jumlah_diambil ?? 0;
-                                            // Ambil kuota default dari jenis cuti
-                                            $kuotaDefault = $annualLeaveType->kuota ?? 0;
-                                            $sisaCuti = $kuotaDefault - $jumlahDiambil;
+                                            // Ambil record kuota spesifik user ini, jika ada.
+                                            $quotaRecord = $user->userLeaveQuotas->first();
+                                            
+                                            // Jumlah yang diambil adalah dari record tersebut, atau 0 jika belum ada.
+                                            $jumlahDiambil = $quotaRecord->jumlah_diambil ?? 0;
+                                            
+                                            // Sisa cuti adalah kuota default dikurangi yang sudah diambil.
+                                            $sisaCuti = $annualLeaveQuota - $jumlahDiambil;
                                         @endphp
-                                        {{ $sisaCuti }} hari
+                                        
+                                        {{-- Tampilkan 0 jika hasilnya negatif (untuk kasus anomali) --}}
+                                        {{ max(0, $sisaCuti) }} hari
                                         {{-- ▲▲▲ SELESAI ▲▲▲ --}}
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-center space-x-3">
-                                            <a href="{{ route('admin.users.edit', $user->id) }}" class="px-3 py-1.5 text-xs font-medium text-white bg-neutral-600 rounded-md hover:bg-neutral-700 transition">Edit</a>
-                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
+                                            <a href="{{ route('admin.leave-request.edit', $request->id) }}" class="px-3 py-1.5 text-xs font-medium text-white bg-neutral-600 rounded-md hover:bg-neutral-700 transition">Edit</a>
+                                            <form action="{{ route('admin.leave-request.destroy', $request->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition">Hapus</button>

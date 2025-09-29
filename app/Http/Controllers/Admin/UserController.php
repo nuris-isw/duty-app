@@ -19,24 +19,37 @@ class UserController extends Controller
      */
     public function index()
     {
+        $viewer = auth()->user();
         $currentYear = now()->year;
         // Cari ID untuk jenis cuti 'Cuti Tahunan'
-        $annualLeaveType = LeaveType::where('nama_cuti', 'Cuti Tahunan')->first();
+        $annualLeaveType = LeaveType::where('nama_cuti', 'Tahunan')->first();
+        $annualLeaveQuota = $annualLeaveType->kuota ?? 0; // Ambil nilai kuota default
 
-        $users = User::with(['jabatan', 'unitKerja', 
+        // Mulai query User dengan relasi yang dibutuhkan
+        $usersQuery = User::with(['jabatan', 'unitKerja', 
             // Ambil data kuota yang relevan saja (Cuti Tahunan untuk tahun ini)
             'userLeaveQuotas' => function ($query) use ($annualLeaveType, $currentYear) {
                 if ($annualLeaveType) {
                     $query->where('leave_type_id', $annualLeaveType->id)
-                          ->where('tahun', $currentYear);
+                        ->where('tahun', $currentYear);
                 }
             }
-        ])->latest()->get();
+        ]);
+
+        // Jika yang melihat adalah atasan, filter hanya untuk timnya
+        if ($viewer->role === 'atasan') {
+            $subordinateIds = $viewer->subordinates()->pluck('id')->toArray();
+            $teamIds = array_merge($subordinateIds, [$viewer->id]); // Gabungkan ID bawahan dengan ID diri sendiri
+            $usersQuery->whereIn('id', $teamIds);
+        }
+
+        // Eksekusi query
+        $users = $usersQuery->latest()->get();
 
         // Kirim data user ke view
         return view('admin.users.index', [
             'users' => $users,
-            'annualLeaveType' => $annualLeaveType
+            'annualLeaveQuota' => $annualLeaveQuota, // Kirim nilai kuota, bukan objeknya
         ]);
     }
 
