@@ -94,4 +94,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserLeaveQuota::class);
     }
+    
+    public function fingerprintUser()
+    {
+        return $this->hasOne(FingerDeviceUser::class, 'user_id');
+    }
 }

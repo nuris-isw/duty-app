@@ -16,6 +16,10 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    <x-nav-link :href="route('my-attendance.index')" :active="request()->routeIs('my-attendance.index')">
+                        {{ __('Absensi') }}
+                    </x-nav-link>
                     
                     @can('is-admin')
                     <div class="hidden sm:flex sm:items-center">
@@ -52,13 +56,44 @@
                                 <x-dropdown-link :href="route('admin.leave-types.index')" :active="request()->routeIs('admin.leave-types.*')">
                                     {{ __('Manajemen Jenis Cuti') }}
                                 </x-dropdown-link>
+                                <x-dropdown-link :href="route('admin.attendance.mapping')" :active="request()->routeIs('admin.attendance.mapping.*')">
+                                    {{ __('Mapping Absensi') }}
+                                </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
                     </div>
 
-                    <x-nav-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.*')">
-                        {{ __('Laporan') }}
-                    </x-nav-link>
+                    <div class="hidden sm:flex sm:items-center">
+                        <x-dropdown align="left" width="48">
+                            <x-slot name="trigger">
+                                <button class="inline-flex items-center px-3 py-2 
+                                               border border-transparent 
+                                               text-sm leading-4 font-medium rounded-md 
+                                               text-neutral-600 dark:text-neutral-300 
+                                               bg-white dark:bg-neutral-900 
+                                               hover:text-brand dark:hover:text-brand-light 
+                                               hover:bg-neutral-50 dark:hover:bg-neutral-800 
+                                               focus:outline-none 
+                                               focus:ring-2 focus:ring-brand/60 dark:focus:ring-brand/40 
+                                               transition ease-in-out duration-150">
+                                    <div>Laporan</div>
+                                    <div class="ms-1">
+                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </x-slot>
+                            <x-slot name="content">
+                                <x-dropdown-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.*')">
+                                    {{ __('Laporan Cuti') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('admin.attendance.report')" :active="request()->routeIs('admin.attendance.report.*')">
+                                    {{ __('Laporan Absensi') }}
+                                </x-dropdown-link>
+                            </x-slot>
+                        </x-dropdown>
+                    </div>
 
                     <x-nav-link :href="route('calendar.index')" :active="request()->routeIs('calendar.index')">
                         {{ __('Kalender Cuti') }}
@@ -133,6 +168,10 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
+            <x-responsive-nav-link :href="route('my-attendance.index')" :active="request()->routeIs('my-attendance.index')">
+                {{ __('Absensi') }}
+            </x-responsive-nav-link>
+
             @can('is-admin')
                 <div class="pt-2 pb-1 border-t border-neutral-200 dark:border-neutral-700">
                     <div class="px-4 mt-2 mb-1">
@@ -147,13 +186,19 @@
                     <x-responsive-nav-link :href="route('admin.jabatan.index')" :active="request()->routeIs('admin.jabatan.*')">
                         {{ __('Manajemen Jabatan') }}
                     </x-responsive-nav-link>
-                     <x-responsive-nav-link :href="route('admin.leave-types.index')" :active="request()->routeIs('admin.leave-types.*')">
+                    <x-responsive-nav-link :href="route('admin.leave-types.index')" :active="request()->routeIs('admin.leave-types.*')">
                         {{ __('Manajemen Jenis Cuti') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.attendance.mapping')" :active="request()->routeIs('admin.attendance.mapping.*')">
+                        {{ __('Mapping Absensi') }}
                     </x-responsive-nav-link>
                 </div>
                 <div class="pt-2 pb-1 border-t border-neutral-200 dark:border-neutral-700">
                      <x-responsive-nav-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.*')">
-                        {{ __('Laporan') }}
+                        {{ __('Laporan Cuti') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.attendance.report')" :active="request()->routeIs('admin.attendance.report.*')">
+                        {{ __('Laporan Absensi') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('calendar.index')" :active="request()->routeIs('calendar.index')">
                         {{ __('Kalender Cuti') }}

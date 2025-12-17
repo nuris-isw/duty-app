@@ -10,7 +10,10 @@ use App\Http\Controllers\Admin\UnitKerjaController;
 use App\Http\Controllers\Admin\JabatanController;
 use App\Http\Controllers\Admin\LeaveTypeController;
 use App\Http\Controllers\Admin\LeaveRequestController as AdminLeaveRequestController;
+use App\Http\Controllers\Admin\FingerprintUserController;
+use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\UserLeaveQuotaController;
+use App\Http\Controllers\MyAttendanceController;
 use App\Http\Controllers\CalendarController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
@@ -45,6 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
     // Route API untuk data event kalender
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
+    Route::get('/my-attendance', [MyAttendanceController::class, 'index'])->name('my-attendance.index');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -58,6 +62,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/leave-requests/{leaveRequest}/edit', [AdminLeaveRequestController::class, 'edit'])->name('leave-requests.edit');
     Route::patch('/leave-requests/{leaveRequest}', [AdminLeaveRequestController::class, 'update'])->name('leave-requests.update');
     Route::delete('/leave-requests/{leaveRequest}', [AdminLeaveRequestController::class, 'destroy'])->name('leave-requests.destroy');
+    // Route Mapping Fingerprint
+    Route::get('/attendance/mapping', [FingerprintUserController::class, 'index'])->name('attendance.mapping');
+    Route::put('/attendance/mapping/{id}', [FingerprintUserController::class, 'update'])->name('attendance.mapping.update');
+    Route::get('/attendance/report', [AttendanceController::class, 'index'])->name('attendance.report');
 });
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');

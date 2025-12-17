@@ -90,8 +90,8 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-center space-x-3">
-                                            <a href="{{ route('admin.leave-request.edit', $request->id) }}" class="px-3 py-1.5 text-xs font-medium text-white bg-neutral-600 rounded-md hover:bg-neutral-700 transition">Edit</a>
-                                            <form action="{{ route('admin.leave-request.destroy', $request->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
+                                            <a href="{{ route('admin.users.edit', $user->id) }}" class="px-3 py-1.5 text-xs font-medium text-white bg-neutral-600 rounded-md hover:bg-neutral-700 transition">Edit</a>
+                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition">Hapus</button>
