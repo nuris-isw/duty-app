@@ -39,8 +39,8 @@ class LeaveRequestController extends Controller
         $user = Auth::user();
 
         // Atur nilai default SEBELUM validasi
-        if ($leaveType->nama_cuti === 'Sakit') {
-            $request->merge(['reason' => 'Sakit']);
+        if ($leaveType->nama_cuti === 'Izin Sakit') {
+            $request->merge(['reason' => 'Izin Sakit']);
         }
 
         // 2. Validasi Lanjutan Berdasarkan Aturan

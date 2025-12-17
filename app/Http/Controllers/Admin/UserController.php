@@ -22,7 +22,7 @@ class UserController extends Controller
         $viewer = auth()->user();
         $currentYear = now()->year;
         // Cari ID untuk jenis cuti 'Cuti Tahunan'
-        $annualLeaveType = LeaveType::where('nama_cuti', 'Tahunan')->first();
+        $annualLeaveType = LeaveType::where('nama_cuti', 'Cuti Tahunan')->first();
         $annualLeaveQuota = $annualLeaveType->kuota ?? 0; // Ambil nilai kuota default
 
         // Mulai query User dengan relasi yang dibutuhkan

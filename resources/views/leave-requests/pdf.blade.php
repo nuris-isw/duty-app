@@ -68,7 +68,7 @@
             </tr>
         </table>
 
-        <p>Telah diberikan izin / cuti <strong>{{ $leaveRequest->leave_type }}</strong> terhitung mulai tanggal <strong>{{ \Carbon\Carbon::parse($leaveRequest->start_date)->isoFormat('D MMMM Y') }}</strong> sampai dengan tanggal <strong>{{ \Carbon\Carbon::parse($leaveRequest->end_date)->isoFormat('D MMMM Y') }}</strong>.</p>
+        <p>Telah diberikan <strong>{{ $leaveRequest->leave_type }}</strong> terhitung mulai tanggal <strong>{{ \Carbon\Carbon::parse($leaveRequest->start_date)->isoFormat('D MMMM Y') }}</strong> sampai dengan tanggal <strong>{{ \Carbon\Carbon::parse($leaveRequest->end_date)->isoFormat('D MMMM Y') }}</strong>.</p>
         
         @if ($leaveRequest->reason)
             <p>Adapun alasan pengajuan adalah sebagai berikut: <br><em>{{ $leaveRequest->reason }}</em></p>
