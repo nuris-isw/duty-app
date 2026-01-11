@@ -45,7 +45,7 @@ class LeaveRequestStatusUpdated extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.leave-request-status',
+            markdown: 'emails.leave-request-status',
         );
     }
 

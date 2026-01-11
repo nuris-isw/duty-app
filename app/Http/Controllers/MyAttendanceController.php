@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\AttendanceLog;
 use App\Models\LeaveRequest;
+use App\Models\Holiday;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
@@ -14,14 +15,16 @@ class MyAttendanceController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+
+        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+        
+        $holidays = Holiday::whereBetween('date', [$startDate, $endDate])->get();
         
         // Cek Mapping
         if (!$user->fingerprintUser) {
             return view('my-attendance.unmapped');
         }
-
-        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
-        $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
 
         $machineId = $user->fingerprintUser->user_id_machine;
 
@@ -54,7 +57,10 @@ class MyAttendanceController extends Controller
         foreach ($period as $dateObj) {
             $dateString = $dateObj->format('Y-m-d');
             $dayLogs = $logs->get($dateString);
-
+            // Cek apakah tanggal ini ada di database libur?
+            $isHoliday = $holidays->first(function ($holiday) use ($dateString) {
+                return \Carbon\Carbon::parse($holiday->date)->format('Y-m-d') === $dateString;
+            });
             // Setup Default
             $clockInTime = '-';
             $clockOutTime = '-';
@@ -62,8 +68,13 @@ class MyAttendanceController extends Controller
             $colorClass = 'text-red-600 border-red-200 bg-red-50'; // Default Class Badge
 
             // --- LOGIKA 1: HARI LIBUR ---
-            if ($dateObj->isWeekend()) {
-                $status = 'Libur';
+            if ($dateObj->isWeekend() || $isHoliday) {
+                // Tentukan Label Libur
+                if ($isHoliday) {
+                    $status = 'Libur: ' . $isHoliday->title; 
+                } else {
+                    $status = 'Libur Akhir Pekan';
+                }
                 $colorClass = 'text-neutral-500 border-neutral-200 bg-neutral-50'; 
 
                 if ($dayLogs && $dayLogs->count() > 0) {
@@ -73,7 +84,7 @@ class MyAttendanceController extends Controller
             }
             
             // --- LOGIKA 2: DATA ABSENSI ---
-            if ($dayLogs && $dayLogs->count() > 0) {
+            elseif ($dayLogs && $dayLogs->count() > 0) {
                 $morningLogs = $dayLogs->filter(fn($log) => $log->timestamp->hour < 10);
                 $afternoonLogs = $dayLogs->filter(fn($log) => $log->timestamp->hour >= 10);
 
@@ -118,7 +129,7 @@ class MyAttendanceController extends Controller
                 }
             } 
             // --- LOGIKA 3: CEK CUTI ---
-            elseif (!$dateObj->isWeekend()) {
+            elseif (!$dateObj->isWeekend() && !$isHoliday) {
                 $todayLeave = $approvedLeaves->first(function ($leave) use ($dateString) {
                     return $dateString >= $leave->start_date && $dateString <= $leave->end_date;
                 });

@@ -59,6 +59,9 @@
                                 <x-dropdown-link :href="route('admin.attendance.mapping')" :active="request()->routeIs('admin.attendance.mapping.*')">
                                     {{ __('Mapping Absensi') }}
                                 </x-dropdown-link>
+                                <x-dropdown-link :href="route('admin.holidays.index')" :active="request()->routeIs('admin.holidays.index')">
+                                    {{ __('Setting Hari Libur') }}
+                                </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
                     </div>
@@ -191,6 +194,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.attendance.mapping')" :active="request()->routeIs('admin.attendance.mapping.*')">
                         {{ __('Mapping Absensi') }}
+                    </x-responsive-nav-link>
+                   <x-responsive-nav-link :href="route('admin.holidays.index')" :active="request()->routeIs('admin.holidays.index')">
+                        {{ __('Setting Hari Libur') }}
                     </x-responsive-nav-link>
                 </div>
                 <div class="pt-2 pb-1 border-t border-neutral-200 dark:border-neutral-700">

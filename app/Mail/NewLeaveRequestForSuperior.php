@@ -40,7 +40,7 @@ class NewLeaveRequestForSuperior extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.new-leave-request',
+            markdown: 'emails.new-leave-request',
         );
     }
 

@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\LeaveTypeController;
 use App\Http\Controllers\Admin\LeaveRequestController as AdminLeaveRequestController;
 use App\Http\Controllers\Admin\FingerprintUserController;
 use App\Http\Controllers\Admin\AttendanceController;
+use App\Http\Controllers\Admin\HolidayController;
+use App\Http\Controllers\Admin\AttendanceRecapController;
 use App\Http\Controllers\UserLeaveQuotaController;
 use App\Http\Controllers\MyAttendanceController;
 use App\Http\Controllers\CalendarController;
@@ -59,17 +61,23 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('unit-kerja', UnitKerjaController::class);
     Route::resource('jabatan', JabatanController::class);
     Route::resource('leave-types', LeaveTypeController::class);
-    Route::get('/leave-requests/{leaveRequest}/edit', [AdminLeaveRequestController::class, 'edit'])->name('leave-requests.edit');
-    Route::patch('/leave-requests/{leaveRequest}', [AdminLeaveRequestController::class, 'update'])->name('leave-requests.update');
-    Route::delete('/leave-requests/{leaveRequest}', [AdminLeaveRequestController::class, 'destroy'])->name('leave-requests.destroy');
+
+    Route::resource('leave-requests', AdminLeaveRequestController::class);
     // Route Mapping Fingerprint
     Route::get('/attendance/mapping', [FingerprintUserController::class, 'index'])->name('attendance.mapping');
     Route::put('/attendance/mapping/{id}', [FingerprintUserController::class, 'update'])->name('attendance.mapping.update');
     Route::get('/attendance/report', [AttendanceController::class, 'index'])->name('attendance.report');
+    // Route Setting Holidays
+    Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays.index');
+    Route::post('/holidays', [HolidayController::class, 'store'])->name('holidays.store');
+    Route::delete('/holidays/{id}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
+    // Route Rekapitulasi Matriks Absensi
+    Route::get('/rekap-absensi', [AttendanceRecapController::class, 'index'])->name('rekap-absensi.index');
+    Route::get('/rekap-absensi/print-summary', [AttendanceRecapController::class, 'printSummary'])->name('rekap-absensi.print-summary');
+    Route::get('/rekap-absensi/print-matrix', [AttendanceRecapController::class, 'printMatrix'])->name('rekap-absensi.print-matrix');
 });
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
-
 
 require __DIR__.'/auth.php';
