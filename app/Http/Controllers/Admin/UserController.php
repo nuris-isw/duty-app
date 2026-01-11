@@ -10,153 +10,169 @@ use App\Models\UnitKerja;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    /**
-     * Menampilkan halaman daftar user.
-     */
     public function index()
     {
-        $viewer = auth()->user();
-        $currentYear = now()->year;
-        // Cari ID untuk jenis cuti 'Cuti Tahunan'
-        $annualLeaveType = LeaveType::where('nama_cuti', 'Cuti Tahunan')->first();
-        $annualLeaveQuota = $annualLeaveType->kuota ?? 0; // Ambil nilai kuota default
-
-        // Mulai query User dengan relasi yang dibutuhkan
-        $usersQuery = User::with(['jabatan', 'unitKerja', 
-            // Ambil data kuota yang relevan saja (Cuti Tahunan untuk tahun ini)
-            'userLeaveQuotas' => function ($query) use ($annualLeaveType, $currentYear) {
-                if ($annualLeaveType) {
-                    $query->where('leave_type_id', $annualLeaveType->id)
-                        ->where('tahun', $currentYear);
-                }
-            }
-        ]);
-
-        // Jika yang melihat adalah atasan, filter hanya untuk timnya
-        if ($viewer->role === 'atasan') {
-            $subordinateIds = $viewer->subordinates()->pluck('id')->toArray();
-            $teamIds = array_merge($subordinateIds, [$viewer->id]); // Gabungkan ID bawahan dengan ID diri sendiri
-            $usersQuery->whereIn('id', $teamIds);
+        // CEGAH Unit Admin & User Biasa masuk sini
+        if (!Gate::allows('manage-master-data')) {
+            abort(403, 'Anda tidak memiliki akses ke menu pengaturan.');
         }
 
-        // Eksekusi query
+        $currentUser = Auth::user();
+        $currentYear = now()->year;
+        $annualLeaveType = LeaveType::where('nama_cuti', 'Cuti Tahunan')->first();
+        $annualLeaveQuota = $annualLeaveType->kuota ?? 0;
+
+        // Query Dasar
+        $usersQuery = User::with(['jabatan', 'unitKerja', 'userLeaveQuotas' => function ($query) use ($annualLeaveType, $currentYear) {
+            if ($annualLeaveType) {
+                $query->where('leave_type_id', $annualLeaveType->id)->where('tahun', $currentYear);
+            }
+        }]);
+
+        // PROTEKSI SUPERADMIN:
+        // Jika yang login adalah SysAdmin, sembunyikan Superadmin dari list
+        if ($currentUser->role === 'sys_admin') {
+            $usersQuery->where('role', '!=', 'superadmin');
+        }
+
         $users = $usersQuery->latest()->get();
 
-        // Kirim data user ke view
         return view('admin.users.index', [
             'users' => $users,
-            'annualLeaveQuota' => $annualLeaveQuota, // Kirim nilai kuota, bukan objeknya
+            'annualLeaveQuota' => $annualLeaveQuota,
         ]);
     }
 
     public function create()
     {
-        // Ambil semua user yang rolenya 'atasan' untuk pilihan dropdown
-        $superiors = User::where('role', 'atasan')->get(); 
-        $unitKerjas = UnitKerja::all();
-        $jabatans = Jabatan::all();
-        // Kirim data atasan ke view
+        if (!Gate::allows('manage-master-data')) abort(403);
+
+        // Filter Atasan: SysAdmin tidak boleh melihat Superadmin untuk dijadikan atasan
+        $superiorsQuery = User::whereIn('role', ['superadmin', 'sys_admin', 'unit_admin']);
+        
+        if (Auth::user()->role === 'sys_admin') {
+            $superiorsQuery->where('role', '!=', 'superadmin');
+        }
+
         return view('admin.users.create', [
-            'superiors' => $superiors,
-            'unitKerjas' => $unitKerjas,
-            'jabatans' => $jabatans,
+            'superiors' => $superiorsQuery->get(),
+            'unitKerjas' => UnitKerja::all(),
+            'jabatans' => Jabatan::all(),
         ]);
     }
 
-    /**
-     * Menyimpan user baru ke database.
-     */
     public function store(Request $request)
     {
-        // 1. Validasi input
+        if (!Gate::allows('manage-master-data')) abort(403);
+
+        // Validasi Role yang boleh diinput
+        // SysAdmin tidak boleh membuat user dengan role 'superadmin'
+        $allowedRoles = 'sys_admin,unit_admin,user';
+        if (Auth::user()->role === 'superadmin') {
+            $allowedRoles .= ',superadmin';
+        }
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,atasan,pegawai',
+            'role' => 'required|in:' . $allowedRoles, // Validasi dinamis
             'atasan_id' => 'nullable|exists:users,id',
-            'unit_kerja_id' => 'required|exists:unit_kerjas,id', // <-- Validasi baru
+            'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'jabatan_id' => 'required|exists:jabatans,id', 
         ]);
 
-        // 2. Buat user baru
         User::create([
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
-            'password' => Hash::make($validatedData['password']), // Enkripsi password
+            'password' => Hash::make($validatedData['password']),
             'role' => $validatedData['role'],
             'atasan_id' => $validatedData['atasan_id'],
-            'unit_kerja_id' => $validatedData['unit_kerja_id'], // <-- Simpan data baru
+            'unit_kerja_id' => $validatedData['unit_kerja_id'],
             'jabatan_id' => $validatedData['jabatan_id'], 
         ]);
 
-        // 3. Redirect dengan pesan sukses
         return redirect()->route('admin.users.index')->with('success', 'User baru berhasil ditambahkan!');
     }
 
-    /**
-     * Menampilkan form untuk mengedit user.
-     */
     public function edit(User $user)
     {
-        // Ambil semua data yang dibutuhkan untuk dropdown
-        $superiors = User::where('role', 'atasan')->where('id', '!=', $user->id)->get();
-        $unitKerjas = UnitKerja::all();
-        $jabatans = Jabatan::all();
+        if (!Gate::allows('manage-master-data')) abort(403);
+
+        // PROTEKSI: SysAdmin tidak boleh edit Superadmin
+        if ($user->role === 'superadmin' && Auth::user()->role !== 'superadmin') {
+            abort(403, 'Anda tidak berhak mengedit data Superadmin.');
+        }
+
+        $superiors = User::whereIn('role', ['superadmin', 'sys_admin', 'unit_admin'])
+                        ->where('id', '!=', $user->id);
+
+        if (Auth::user()->role === 'sys_admin') {
+            $superiors->where('role', '!=', 'superadmin');
+        }
 
         return view('admin.users.edit', [
             'user' => $user,
-            'superiors' => $superiors,
-            'unitKerjas' => $unitKerjas,
-            'jabatans' => $jabatans,
+            'superiors' => $superiors->get(),
+            'unitKerjas' => UnitKerja::all(),
+            'jabatans' => Jabatan::all(),
         ]);
     }
 
-    /**
-     * Memperbarui data user di database.
-     */
     public function update(Request $request, User $user)
     {
+        if (!Gate::allows('manage-master-data')) abort(403);
+        
+        // PROTEKSI: SysAdmin tidak boleh update Superadmin
+        if ($user->role === 'superadmin' && Auth::user()->role !== 'superadmin') {
+            abort(403);
+        }
+
+        $allowedRoles = 'sys_admin,unit_admin,user';
+        if (Auth::user()->role === 'superadmin') {
+            $allowedRoles .= ',superadmin';
+        }
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'role' => 'required|in:admin,atasan,pegawai',
+            'role' => 'required|in:' . $allowedRoles,
             'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'jabatan_id' => 'required|exists:jabatans,id',
             'atasan_id' => 'nullable|exists:users,id',
-            'password' => 'nullable|string|min:8', // Password tidak wajib diisi saat edit
+            'password' => 'nullable|string|min:8',
         ]);
 
-        // Jika ada password baru, enkripsi dan update
         if (!empty($validatedData['password'])) {
             $validatedData['password'] = Hash::make($validatedData['password']);
             $user->update($validatedData);
         } else {
-            // Jika tidak ada password baru, update data selain password
             $user->update($request->except('password'));
         }
 
         return redirect()->route('admin.users.index')->with('success', 'Data user berhasil diperbarui.');
     }
 
-    /**
-     * Menghapus user dari database.
-     */
     public function destroy(User $user)
     {
-        // Tambahkan pengecekan agar admin tidak bisa menghapus akunnya sendiri
+        if (!Gate::allows('manage-master-data')) abort(403);
+
+        // 1. Tidak boleh hapus diri sendiri
         if ($user->id === Auth::id()) {
-            return redirect()->route('admin.users.index')
-                ->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+            return redirect()->route('admin.users.index')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+        }
+
+        // 2. SysAdmin tidak boleh hapus Superadmin
+        if ($user->role === 'superadmin' && Auth::user()->role !== 'superadmin') {
+            return redirect()->route('admin.users.index')->with('error', 'Anda tidak berhak menghapus Superadmin.');
         }
 
         $user->delete();
-
-        return redirect()->route('admin.users.index')
-            ->with('success', 'User berhasil dihapus.');
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
     }
 }

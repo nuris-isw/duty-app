@@ -88,36 +88,72 @@
                         <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
                             @forelse ($leaveRequests as $request)
                                 <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $request->user->name ?? 'N/A' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $request->user->jabatan->nama_jabatan ?? 'N/A' }} {{ $request->user->jabatan->alias ?? 'N/A' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $request->leave_type }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ \Carbon\Carbon::parse($request->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900 dark:text-neutral-100">{{ $request->user->name ?? 'N/A' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">{{ $request->user->jabatan->alias ?? 'N/A' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">{{ $request->leave_type }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-neutral-600 dark:text-neutral-400">
+                                        {{ \Carbon\Carbon::parse($request->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}
+                                    </td>
                                     <td class="px-6 py-4 text-center">
                                         @php
                                             $statusClass = [
-                                                'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-                                                'approved' => 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-                                                'rejected' => 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
-                                            ][$request->status] ?? 'bg-gray-100 text-gray-800';
+                                                'pending' => 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
+                                                'approved' => 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
+                                                'rejected' => 'bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800',
+                                            ][$request->status] ?? 'bg-gray-100 text-gray-800 border border-gray-200';
                                         @endphp
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">
+                                        <span class="px-2.5 py-0.5 text-xs font-medium rounded-full {{ $statusClass }}">
                                             {{ ucfirst($request->status) }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-center space-x-3">
-                                            <a href="{{ route('admin.leave-requests.edit', $user->id) }}" class="px-3 py-1.5 text-xs font-medium text-white bg-neutral-600 rounded-md hover:bg-neutral-700 transition">Edit</a>
-                                            <form action="{{ route('admin.leave-requests.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pengajuan ini?');">
+                                            
+                                            {{-- 1. Tombol Edit (Pensil) --}}
+                                            {{-- Hanya tampil jika pending atau user punya hak edit --}}
+                                            <a href="{{ route('admin.leave-requests.edit', $request->id) }}" 
+                                            class="text-neutral-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition" 
+                                            title="Edit Pengajuan">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </a>
+
+                                            {{-- 2. Tombol Cetak PDF (Printer) --}}
+                                            {{-- Hanya tampil jika status Approved --}}
+                                            @if ($request->status === 'approved')
+                                                <a href="{{ route('admin.leave-requests.print', $request->id) }}" 
+                                                target="_blank"
+                                                class="text-neutral-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition" 
+                                                title="Cetak Surat Izin">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                                    </svg>
+                                                </a>
+                                            @endif
+
+                                            {{-- 3. Tombol Hapus (Tempat Sampah) --}}
+                                            {{-- Hanya Superadmin/SysAdmin --}}
+                                            @can('manage-master-data')
+                                            <form action="{{ route('admin.leave-requests.destroy', $request->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data ini secara permanen?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition">Hapus</button>
+                                                <button type="submit" 
+                                                        class="text-neutral-500 hover:text-rose-600 dark:hover:text-rose-400 transition mt-1" 
+                                                        title="Hapus Pengajuan">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
                                             </form>
+                                            @endcan
+
                                         </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-10 text-center text-sm text-neutral-500">
+                                    <td colspan="6" class="px-6 py-10 text-center text-sm text-neutral-500 dark:text-neutral-400">
                                         Tidak ada data yang cocok dengan filter Anda.
                                     </td>
                                 </tr>

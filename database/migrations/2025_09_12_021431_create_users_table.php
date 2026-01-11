@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('password')->default('170845');
             $table->string('google_id')->nullable();
             $table->string('avatar')->nullable();
-            $table->enum('role', ['admin', 'atasan', 'pegawai'])->default('pegawai');
+            $table->enum('role', ['superadmin', 'sys_admin', 'unit_admin', 'user'])->default('user');
             $table->foreignId('unit_kerja_id')->nullable()->constrained('unit_kerjas')->onDelete('set null');
             $table->foreignId('jabatan_id')->nullable()->constrained('jabatans')->onDelete('set null');
             $table->foreignId('atasan_id')->nullable()->constrained('users')->onDelete('set null');

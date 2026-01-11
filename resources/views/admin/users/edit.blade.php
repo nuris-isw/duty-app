@@ -47,9 +47,9 @@
                             <div>
                                 <x-input-label for="role" :value="__('Role')" />
                                 <x-select-input name="role" id="role" class="block mt-1 w-full">
-                                    <option value="admin" @selected(old('role', $user->role) == 'admin')>Admin</option>
-                                    <option value="atasan" @selected(old('role', $user->role) == 'atasan')>Atasan</option>
-                                    <option value="pegawai" @selected(old('role', $user->role) == 'pegawai')>Pegawai</option>
+                                    <option value="sys_admin" @selected(old('role', $user->role) == 'sys_admin')>Admin Sistem</option>
+                                    <option value="unit_admin" @selected(old('role', $user->role) == 'unit_admin')>Admin Unit</option>
+                                    <option value="user" @selected(old('role', $user->role) == 'user')>Pegawai</option>
                                 </x-select-input>
                             </div>
                             <div>

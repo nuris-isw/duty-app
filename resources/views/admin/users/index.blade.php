@@ -11,12 +11,12 @@
                 
                 {{-- Notifikasi --}}
                 @if (session('success'))
-                    <div class="mb-6 p-4 bg-green-50 text-green-700 border-l-4 border-green-400 rounded-lg">
+                    <div class="mb-6 p-4 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-l-4 border-green-400 rounded-lg">
                         {{ session('success') }}
                     </div>
                 @endif
                 @if (session('error'))
-                    <div class="mb-6 p-4 bg-red-50 text-red-700 border-l-4 border-red-400 rounded-lg">
+                    <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-l-4 border-red-400 rounded-lg">
                         {{ session('error') }}
                     </div>
                 @endif
@@ -34,16 +34,17 @@
                         <thead class="bg-neutral-100 dark:bg-neutral-900">
                             <tr class="divide-x divide-neutral-200 dark:divide-neutral-700">
                                 <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
-                                    Nama
-                                </th>
-                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
-                                    Email
+                                    Nama & Email
                                 </th>
                                 <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
                                     Role
                                 </th>
+                                {{-- KOLOM BARU: Unit Kerja --}}
                                 <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
-                                    Sisa Cuti Tahunan
+                                    Unit Kerja
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                                    Lokasi
                                 </th>
                                 <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
                                     Aksi
@@ -53,56 +54,72 @@
                         <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
                             @forelse ($users as $user)
                                 <tr class="divide-x divide-neutral-200 dark:divide-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
-                                    <td class="px-6 py-4 whitespace-nowrap text-neutral-900 dark:text-neutral-100">{{ $user->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-neutral-600 dark:text-neutral-300">{{ $user->email }}</td>
+                                    
+                                    {{-- Kolom Nama & Email (Digabung agar ringkas) --}}
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">{{ $user->name }}</div>
+                                        <div class="text-xs text-neutral-500 dark:text-neutral-400">{{ $user->email }}</div>
+                                    </td>
+
+                                    {{-- Kolom Role (Update Warna Badge) --}}
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
                                         @php
                                             $roleClass = '';
-                                            if ($user->role === 'admin') {
-                                                $roleClass = 'bg-red-200 text-red-900';
-                                            } elseif ($user->role === 'atasan') {
-                                                $roleClass = 'bg-blue-200 text-blue-900';
-                                            } else {
-                                                $roleClass = 'bg-gray-200 text-gray-800';
+                                            switch($user->role) {
+                                                case 'superadmin': 
+                                                    $roleClass = 'bg-purple-100 text-purple-800 border border-purple-200'; break;
+                                                case 'sys_admin': 
+                                                    $roleClass = 'bg-rose-100 text-rose-800 border border-rose-200'; break;
+                                                case 'unit_admin': 
+                                                    $roleClass = 'bg-blue-100 text-blue-800 border border-blue-200'; break;
+                                                default: // user
+                                                    $roleClass = 'bg-gray-100 text-gray-800 border border-gray-200'; 
                                             }
                                         @endphp
-
                                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $roleClass }}">
-                                            {{ ucfirst($user->role) }}
+                                            {{-- Ubah format teks (superadmin -> Superadmin) --}}
+                                            {{ ucwords(str_replace('_', ' ', $user->role)) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        {{-- ▼▼▼ LOGIKA BARU UNTUK SISA CUTI ▼▼▼ --}}
-                                        @php
-                                            // Ambil record kuota spesifik user ini, jika ada.
-                                            $quotaRecord = $user->userLeaveQuotas->first();
-                                            
-                                            // Jumlah yang diambil adalah dari record tersebut, atau 0 jika belum ada.
-                                            $jumlahDiambil = $quotaRecord->jumlah_diambil ?? 0;
-                                            
-                                            // Sisa cuti adalah kuota default dikurangi yang sudah diambil.
-                                            $sisaCuti = $annualLeaveQuota - $jumlahDiambil;
-                                        @endphp
-                                        
-                                        {{-- Tampilkan 0 jika hasilnya negatif (untuk kasus anomali) --}}
-                                        {{ max(0, $sisaCuti) }} hari
-                                        {{-- ▲▲▲ SELESAI ▲▲▲ --}}
+
+                                    {{-- Kolom Unit Kerja --}}
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-neutral-600 dark:text-neutral-300">
+                                        {{ $user->unitKerja->nama_unit ?? '-' }}
                                     </td>
-                                    <td class="px-6 py-4">
+
+                                    {{-- Kolom Lokasi --}}
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-neutral-600 dark:text-neutral-300">
+                                        {{ $user->unitKerja->lokasi ?? '-' }}
+                                    </td>
+                        
+                                    {{-- Kolom Aksi --}}
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
                                         <div class="flex items-center justify-center space-x-3">
-                                            <a href="{{ route('admin.users.edit', $user->id) }}" class="px-3 py-1.5 text-xs font-medium text-white bg-neutral-600 rounded-md hover:bg-neutral-700 transition">Edit</a>
-                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition">Hapus</button>
-                                            </form>
+                                            
+                                            {{-- Tombol Edit (Semua Admin Master Data boleh) --}}
+                                            <a href="{{ route('admin.users.edit', $user->id) }}" class="px-3 py-1.5 text-xs font-medium text-white bg-neutral-600 rounded-md hover:bg-neutral-700 transition">
+                                                Edit
+                                            </a>
+
+                                            {{-- Tombol Hapus (HANYA SUPERADMIN) --}}
+                                            {{-- Menggunakan Gate 'manage-superadmin' atau cek manual role --}}
+                                            @if(auth()->user()->role === 'superadmin') 
+                                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition">
+                                                        Hapus
+                                                    </button>
+                                                </form>
+                                            @endif
+
                                         </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-6 py-10 text-center text-sm text-neutral-500">
-                                        Belum ada user.
+                                    <td colspan="5" class="px-6 py-10 text-center text-sm text-neutral-500">
+                                        Belum ada data user.
                                     </td>
                                 </tr>
                             @endforelse

@@ -137,7 +137,7 @@
                 @forelse ($leaveRequests as $request)
                     <tr>
                         <td>{{ $request->user->name ?? 'N/A' }}</td>
-                        <td>{{ $request->user->jabatan->nama_jabatan ?? 'N/A' }} {{ $request->user->jabatan->alias ?? '' }}</td>
+                        <td>{{ $request->user->jabatan->alias ?? '' }}</td>
                         <td>{{ $request->leave_type }}</td>
                         <td class="centered">{{ \Carbon\Carbon::parse($request->start_date)->format('d-m-Y') }}</td>
                         <td class="centered">{{ \Carbon\Carbon::parse($request->end_date)->format('d-m-Y') }}</td>

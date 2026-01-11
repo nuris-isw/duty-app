@@ -51,9 +51,9 @@
                             <div>
                                 <x-input-label for="role" :value="__('Role')" />
                                 <x-select-input name="role" id="role" class="block mt-1 w-full">
-                                    <option value="admin">Admin</option>
-                                    <option value="atasan">Atasan</option>
-                                    <option value="pegawai" selected>Pegawai</option>
+                                    <option value="sys_admin">Admin Sistem</option>
+                                    <option value="unit_admin">Admin Unit</option>
+                                    <option value="user" selected>Pegawai</option>
                                 </x-select-input>
                             </div>
 

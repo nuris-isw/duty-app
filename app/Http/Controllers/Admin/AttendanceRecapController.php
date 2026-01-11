@@ -10,20 +10,42 @@ use App\Models\Holiday;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
-use Barryvdh\DomPDF\Facade\Pdf; // Pastikan library PDF sudah diimport
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate; // Import Gate
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AttendanceRecapController extends Controller
 {
-    /**
-     * Method Utama: Memproses semua logika data.
-     * Digunakan oleh Index (View HTML) dan Print (PDF).
-     */
     private function getData(Request $request)
     {
+        $currentUser = Auth::user();
+        
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
 
-        $users = User::whereHas('fingerprintUser')->orderBy('name')->get();
+        // --- DATA SCOPING LOGIC ---
+        // Query User Dasar
+        $usersQuery = User::whereHas('fingerprintUser')->orderBy('name');
+
+        if (Gate::allows('view-all-units')) {
+            // SCENARIO 1: Superadmin & SysAdmin
+            // SysAdmin tidak boleh melihat data Superadmin di laporan
+            if ($currentUser->role === 'sys_admin') {
+                $usersQuery->where('role', '!=', 'superadmin');
+            }
+        } 
+        elseif ($currentUser->role === 'unit_admin') {
+            // SCENARIO 2: Unit Admin
+            // Hanya melihat user di unit kerja yang sama
+            $usersQuery->where('unit_kerja_id', $currentUser->unit_kerja_id);
+        } 
+        else {
+            // SCENARIO 3: User Biasa (Jaga-jaga jika user akses)
+            $usersQuery->where('id', $currentUser->id);
+        }
+
+        $users = $usersQuery->get();
+        // --------------------------
 
         $allLogs = AttendanceLog::whereDate('timestamp', '>=', $startDate)
             ->whereDate('timestamp', '<=', $endDate)
@@ -52,6 +74,7 @@ class AttendanceRecapController extends Controller
 
         foreach ($users as $user) {
             $machineId = $user->fingerprintUser->user_id_machine;
+            // Filter log & cuti hanya milik user dalam loop ini
             $userLogs = $allLogs->where('user_id_machine', $machineId);
             $userLeaves = $allLeaves->where('user_id', $user->id);
 
@@ -65,19 +88,16 @@ class AttendanceRecapController extends Controller
                 $dateString = $date->format('Y-m-d');
                 $targetPulang = $date->isFriday() ? $jamPulangJumat : $jamPulangNormal;
                 
-                // Logic Status Dasar
                 $status = $date->lt($today) ? 'red' : 'empty';
                 $tooltip = $date->lt($today) ? 'Mangkir / Tanpa Keterangan' : '-';
                 $isMangkir = $date->lt($today);
 
-                // 1. Cek Libur
                 if ($date->isWeekend() || isset($holidays[$dateString])) {
                     $status = isset($holidays[$dateString]) ? 'holiday' : 'gray';
                     $tooltip = isset($holidays[$dateString]) ? 'Libur: '.$holidays[$dateString]->title : 'Libur Akhir Pekan';
                     $isMangkir = false;
                 }
 
-                // 2. Cek Cuti
                 $isLeave = $userLeaves->filter(fn($l) => $dateString >= $l->start_date && $dateString <= $l->end_date)->first();
                 if ($isLeave) {
                     $status = 'blue';
@@ -91,7 +111,6 @@ class AttendanceRecapController extends Controller
                     }
                 }
 
-                // 3. Cek Log Absensi
                 $dayLogs = $userLogs->filter(fn($log) => str_starts_with($log->timestamp, $dateString));
 
                 if ($dayLogs->count() > 0) {
@@ -113,7 +132,6 @@ class AttendanceRecapController extends Controller
                             $ket[] = "Plg Cepat ($outTime)";
                             $summaryData[$user->id]['pulang_awal']++;
                         }
-
                         $status = !empty($ket) ? 'orange' : 'green';
                         $tooltip = !empty($ket) ? "Kurang Disiplin: " . implode(', ', $ket) : "Hadir Lengkap ($inTime - $outTime)";
                     } else {
@@ -128,38 +146,27 @@ class AttendanceRecapController extends Controller
                         }
                     }
                 }
-
                 if ($isMangkir) $summaryData[$user->id]['mangkir']++;
-
                 $recap[$user->id][$dateString] = ['color' => $status, 'tooltip' => $tooltip];
             }
         }
-
-        // Return semua data yang dibutuhkan View/PDF
         return compact('users', 'recap', 'period', 'startDate', 'endDate', 'summaryData');
     }
 
-    // --- 3 METHOD PUBLIK YANG RINGKAS ---
-
-    public function index(Request $request)
-    {
-        $data = $this->getData($request); // Panggil fungsi private di atas
+    public function index(Request $request) {
+        $data = $this->getData($request);
         return view('admin.reports.rekap_absensi.index', $data);
     }
 
-    public function printSummary(Request $request)
-    {
+    public function printSummary(Request $request) {
         $data = $this->getData($request);
-        $pdf = Pdf::loadView('admin.reports.rekap_absensi.print_summary', $data)
-                  ->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView('admin.reports.rekap_absensi.print_summary', $data)->setPaper('a4', 'portrait');
         return $pdf->stream('Rekap_Total_Absensi.pdf');
     }
 
-    public function printMatrix(Request $request)
-    {
+    public function printMatrix(Request $request) {
         $data = $this->getData($request);
-        $pdf = Pdf::loadView('admin.reports.rekap_absensi.print_matrix', $data)
-                  ->setPaper('a4', 'landscape');
+        $pdf = Pdf::loadView('admin.reports.rekap_absensi.print_matrix', $data)->setPaper('a4', 'landscape');
         return $pdf->stream('Matriks_Absensi.pdf');
     }
 }
