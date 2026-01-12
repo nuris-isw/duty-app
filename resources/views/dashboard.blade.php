@@ -54,6 +54,122 @@
                     </x-stat-card>
                 </div>
 
+                {{-- ========================================================== --}}
+                {{-- AREA APPROVAL (Muncul Jika Ada Request dari Bawahan) --}}
+                {{-- ========================================================== --}}
+                @if(isset($subordinatePendingRequests) && $subordinatePendingRequests->isNotEmpty())
+                    <div class="bg-white dark:bg-neutral-800 shadow-lg rounded-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden ring-1 ring-orange-500/20">
+                        <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 bg-orange-50 dark:bg-orange-900/10 flex justify-between items-center">
+                            <h3 class="font-bold text-lg text-orange-800 dark:text-orange-200 flex items-center gap-2">
+                                <span class="flex h-3 w-3 relative">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                                </span>
+                                Menunggu Persetujuan Anda
+                            </h3>
+                            <span class="bg-orange-100 text-orange-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900">
+                                {{ $subordinatePendingRequests->count() }} Permintaan
+                            </span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+                                <thead class="bg-neutral-50 dark:bg-neutral-900">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Pemohon</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-500 uppercase tracking-wider">Tanggal Izin</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-500 uppercase tracking-wider">Jenis Izin</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Keterangan</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-500 uppercase tracking-wider">Dokumen</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-500 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700 bg-white dark:bg-neutral-800">
+                                    @foreach ($subordinatePendingRequests as $request)
+                                        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
+                                            
+                                            {{-- 1. PEMOHON --}}
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-medium text-neutral-900 dark:text-white">{{ $request->user->name }}</div>
+                                                <div class="text-xs text-neutral-500">{{ $request->user->jabatan->alias ?? '-' }}</div>
+                                            </td>
+
+                                            {{-- 2. TANGGAL IZIN --}}
+                                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-neutral-600 dark:text-neutral-300">
+                                                {{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}
+                                                <span class="block text-xs text-neutral-400">
+                                                    ({{ \Carbon\Carbon::parse($request->start_date)->diffInDays(\Carbon\Carbon::parse($request->end_date)) + 1 }} Hari)
+                                                </span>
+                                            </td>
+
+                                            {{-- 3. JENIS IZIN --}}
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                                    {{ $request->leave_type }}
+                                                </span>
+                                            </td>
+
+                                            {{-- 4. KETERANGAN --}}
+                                            <td class="px-6 py-4 text-sm text-neutral-500 dark:text-neutral-300 min-w-[200px] max-w-xs">
+                                                {{ Str::limit($request->reason, 50) }}
+                                            </td>
+
+                                            {{-- 5. DOKUMEN --}}
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                @if ($request->dokumen_pendukung)
+                                                    <a href="{{ asset('storage/' . $request->dokumen_pendukung) }}" target="_blank" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-xs font-medium underline">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                                        </svg>
+                                                        Lihat
+                                                    </a>
+                                                @else
+                                                    <span class="text-neutral-400 text-xs">-</span>
+                                                @endif
+                                            </td>
+
+                                            {{-- 6. AKSI --}}
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <div class="flex items-center justify-center gap-2">
+                                                    {{-- Tombol Setujui --}}
+                                                    <form action="{{ route('leave-requests.approve', $request) }}" method="POST">
+                                                        @csrf @method('PATCH')
+                                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition shadow-sm" title="Setujui">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            Setujui
+                                                        </button>
+                                                    </form>
+
+                                                    {{-- Tombol Tolak --}}
+                                                    <form action="{{ route('leave-requests.reject', $request) }}" method="POST"
+                                                        x-data
+                                                        @submit.prevent="
+                                                            const reason = prompt('Alasan penolakan:');
+                                                            if (reason) {
+                                                                $el.querySelector('[name=rejection_reason]').value = reason;
+                                                                $el.submit();
+                                                            }
+                                                        ">
+                                                        @csrf @method('PATCH')
+                                                        <input type="hidden" name="rejection_reason">
+                                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition shadow-sm" title="Tolak">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                            Tolak
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+
                 {{-- 3. Tabel Cuti Akan Datang --}}
                 <div class="bg-white dark:bg-neutral-800 shadow-sm rounded-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800">
@@ -177,84 +293,6 @@
                     @endif
                 </div>
             @endcan
-
-            {{-- ========================================================== --}}
-            {{-- AREA APPROVAL (Muncul Jika Ada Request dari Bawahan) --}}
-            {{-- ========================================================== --}}
-            @if(isset($subordinatePendingRequests) && $subordinatePendingRequests->isNotEmpty())
-                <div class="bg-white dark:bg-neutral-800 shadow-lg rounded-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden ring-1 ring-orange-500/20">
-                    <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 bg-orange-50 dark:bg-orange-900/10 flex justify-between items-center">
-                        <h3 class="font-bold text-lg text-orange-800 dark:text-orange-200 flex items-center gap-2">
-                            <span class="flex h-3 w-3 relative">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
-                            </span>
-                            Menunggu Persetujuan Anda
-                        </h3>
-                        <span class="bg-orange-100 text-orange-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900">
-                            {{ $subordinatePendingRequests->count() }} Permintaan
-                        </span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
-                            <thead class="bg-neutral-50 dark:bg-neutral-900">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Pemohon</th>
-                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-500 uppercase tracking-wider">Detail Cuti</th>
-                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-neutral-500 uppercase tracking-wider">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700 bg-white dark:bg-neutral-800">
-                                @foreach ($subordinatePendingRequests as $request)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-neutral-900 dark:text-white">{{ $request->user->name }}</div>
-                                            <div class="text-xs text-neutral-500">{{ $request->leave_type }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-neutral-500 dark:text-neutral-300">
-                                            <div class="text-center font-semibold">{{ \Carbon\Carbon::parse($request->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d M') }}</div>
-                                            <div class="text-center text-xs italic mt-1">"{{Str::limit($request->reason, 30)}}"</div>
-                                            @if ($request->dokumen_pendukung)
-                                                <div class="text-center mt-1">
-                                                    <a href="{{ asset('storage/' . $request->dokumen_pendukung) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-xs underline">Lihat Dokumen</a>
-                                                </div>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            <div class="flex items-center justify-center gap-2">
-                                                {{-- Tombol Setujui --}}
-                                                <form action="{{ route('leave-requests.approve', $request) }}" method="POST">
-                                                    @csrf @method('PATCH')
-                                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition shadow-sm">
-                                                        Setujui
-                                                    </button>
-                                                </form>
-
-                                                {{-- Tombol Tolak (AlpineJS) --}}
-                                                <form action="{{ route('leave-requests.reject', $request) }}" method="POST"
-                                                      x-data
-                                                      @submit.prevent="
-                                                          const reason = prompt('Alasan penolakan:');
-                                                          if (reason) {
-                                                              $el.querySelector('[name=rejection_reason]').value = reason;
-                                                              $el.submit();
-                                                          }
-                                                      ">
-                                                    @csrf @method('PATCH')
-                                                    <input type="hidden" name="rejection_reason">
-                                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition shadow-sm">
-                                                        Tolak
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            @endif
             
             {{-- ========================================================== --}}
             {{-- AREA PERSONAL (Semua User) --}}
