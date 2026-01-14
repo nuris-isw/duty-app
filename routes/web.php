@@ -7,6 +7,7 @@ use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\UserLeaveQuotaController;
 use App\Http\Controllers\MyAttendanceController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\AttendanceCorrectionController;
 
 // Admin Controllers
 use App\Http\Controllers\Admin\UserController;
@@ -69,6 +70,11 @@ Route::middleware('auth')->group(function () {
     // Kalender (Controller menangani scoping unit kerja)
     Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
+
+    // Koreksi Absensi
+    Route::resource('attendance-correction', AttendanceCorrectionController::class)->only(['index', 'create', 'store']);
+    Route::patch('/attendance-correction/{correctionRequest}/approve', [AttendanceCorrectionController::class, 'approve'])->name('attendance-correction.approve');
+    Route::patch('/attendance-correction/{correctionRequest}/reject', [AttendanceCorrectionController::class, 'reject'])->name('attendance-correction.reject');
 });
 
 // ====================================================
@@ -90,6 +96,7 @@ Route::middleware(['auth', 'verified', 'can:access-admin-panel']) // Gate: Super
         
         // Laporan Absensi Harian
         Route::get('/attendance/report', [AttendanceController::class, 'index'])->name('attendance.report');
+        Route::post('/attendance/sync', [AttendanceController::class, 'sync'])->name('attendance.sync');
 
         // Rekapitulasi Matriks (Bulanan) & PDF
         Route::get('/rekap-absensi', [AttendanceRecapController::class, 'index'])->name('rekap-absensi.index');

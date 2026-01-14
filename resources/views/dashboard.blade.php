@@ -170,6 +170,89 @@
                     </div>
                 @endif
 
+                {{-- ========================================================== --}}
+                {{-- AREA APPROVAL KOREKSI ABSENSI (BARU) --}}
+                {{-- ========================================================== --}}
+                @if(isset($subordinateCorrectionRequests) && $subordinateCorrectionRequests->isNotEmpty())
+                    <div class="mt-8 bg-white dark:bg-neutral-800 shadow-lg rounded-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden ring-1 ring-purple-500/20">
+                        <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 bg-purple-50 dark:bg-purple-900/10 flex justify-between items-center">
+                            <h3 class="font-bold text-lg text-purple-800 dark:text-purple-200 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Persetujuan Koreksi Absensi
+                            </h3>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-purple-200 dark:text-purple-900">
+                                {{ $subordinateCorrectionRequests->count() }} Permintaan
+                            </span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+                                <thead class="bg-neutral-50 dark:bg-neutral-900">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Pemohon</th>
+                                        <th class="px-6 py-3 text-center text-xs font-bold text-neutral-500 uppercase tracking-wider">Tanggal</th>
+                                        <th class="px-6 py-3 text-center text-xs font-bold text-neutral-500 uppercase tracking-wider">Usulan Jam</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Alasan</th>
+                                        <th class="px-6 py-3 text-center text-xs font-bold text-neutral-500 uppercase tracking-wider">Bukti</th>
+                                        <th class="px-6 py-3 text-center text-xs font-bold text-neutral-500 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700 bg-white dark:bg-neutral-800">
+                                    @foreach ($subordinateCorrectionRequests as $req)
+                                        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-medium text-neutral-900 dark:text-white">{{ $req->user->name }}</div>
+                                                <div class="text-xs text-neutral-500">{{ $req->user->jabatan->alias ?? '-' }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-neutral-600 dark:text-neutral-300">
+                                                {{ \Carbon\Carbon::parse($req->date)->format('d M Y') }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-neutral-600">
+                                                <div class="flex flex-col gap-1">
+                                                    @if($req->proposed_start_time)
+                                                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">In: {{ \Carbon\Carbon::parse($req->proposed_start_time)->format('H:i') }}</span>
+                                                    @endif
+                                                    @if($req->proposed_end_time)
+                                                        <span class="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-100">Out: {{ \Carbon\Carbon::parse($req->proposed_end_time)->format('H:i') }}</span>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-neutral-500 dark:text-neutral-300 max-w-xs truncate" title="{{ $req->reason }}">
+                                                {{ Str::limit($req->reason, 40) }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                @if ($req->dokumen_pendukung)
+                                                    <a href="{{ asset('storage/' . $req->dokumen_pendukung) }}" target="_blank" class="text-blue-600 hover:underline text-xs font-medium">Lihat</a>
+                                                @else
+                                                    <span class="text-neutral-400 text-xs">-</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <div class="flex items-center justify-center gap-2">
+                                                    <form action="{{ route('attendance-correction.approve', $req->id) }}" method="POST">
+                                                        @csrf @method('PATCH')
+                                                        <button type="submit" class="text-green-600 hover:text-green-900" title="Setujui">
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('attendance-correction.reject', $req->id) }}" method="POST" x-data @submit.prevent="const r = prompt('Alasan tolak:'); if(r){ $el.querySelector('[name=rejection_reason]').value = r; $el.submit(); }">
+                                                        @csrf @method('PATCH')
+                                                        <input type="hidden" name="rejection_reason">
+                                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Tolak">
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+
                 {{-- 3. Tabel Cuti Akan Datang --}}
                 <div class="bg-white dark:bg-neutral-800 shadow-sm rounded-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800">

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use App\Models\User;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType; // <--- Jangan lupa import ini
+use App\Models\AttendanceCorrectionRequest;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -103,6 +104,7 @@ class DashboardController extends Controller
         // --- 3. DATA ATASAN ---
         $subordinatePendingRequests = collect();
         $subordinateHistoryRequests = collect();
+        $subordinateCorrectionRequests = collect();
         
         if (User::where('atasan_id', $user->id)->exists()) {
             $subordinatePendingRequests = LeaveRequest::with('user')
@@ -114,6 +116,13 @@ class DashboardController extends Controller
                 ->whereHas('user', fn($q) => $q->where('atasan_id', $user->id))
                 ->whereIn('status', ['approved', 'rejected'])
                 ->orderBy('updated_at', 'desc')->limit(5)->get();
+            
+            // B. Approval Koreksi Absensi (BARU)
+            $subordinateCorrectionRequests = AttendanceCorrectionRequest::with(['user', 'user.jabatan'])
+                ->whereHas('user', fn($q) => $q->where('atasan_id', $user->id))
+                ->where('status', 'pending')
+                ->orderBy('date', 'asc') // Urutkan berdasarkan tanggal absen terlama
+                ->get();
         }
 
         // --- 4. CUTI HARI INI ---
@@ -129,8 +138,14 @@ class DashboardController extends Controller
         }
 
         return view('dashboard', compact(
-            'stats', 'myLeaveRequests', 'currentlyOnLeave', 'upcomingLeaves',
-            'subordinatePendingRequests', 'subordinateHistoryRequests', 'employeeBalances' // <--- Tambah ini
+            'stats', 
+            'myLeaveRequests', 
+            'currentlyOnLeave', 
+            'upcomingLeaves',
+            'subordinatePendingRequests',
+            'subordinateHistoryRequests',
+            'employeeBalances',
+            'subordinateCorrectionRequests'
         ));
     }
 }
