@@ -304,8 +304,8 @@ class AttendanceController extends Controller
                     }
                 }
 
-                // --- 3. Simpan ke Tabel Attendances ---
-                Attendance::updateOrCreate(
+                // --- 3. Cari atau Buat Record Baru ---
+                $attendance = Attendance::firstOrCreate(
                     [
                         'user_id' => $user->id,
                         'date'    => $dateString
@@ -317,7 +317,17 @@ class AttendanceController extends Controller
                         'note'      => $note
                     ]
                 );
-                
+
+                // Jika record sudah ada sebelumnya dan statusnya bukan 'present', lakukan update
+                if (!$attendance->wasRecentlyCreated && $attendance->status !== 'present') {
+                    $attendance->update([
+                        'clock_in'  => $clockIn,
+                        'clock_out' => $clockOut,
+                        'status'    => $status,
+                        'note'      => $note
+                    ]);
+                }
+
                 $counter++;
             }
         }
