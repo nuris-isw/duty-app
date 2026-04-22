@@ -46,7 +46,7 @@ class AttendanceController extends Controller
 
         // 3. Inisialisasi Summary
         $summary = [
-            'hadir' => 0, 'terlambat' => 0, 'pulang_cepat' => 0, 
+            'hadir' => 0, 'piket' => 0, 'terlambat' => 0, 'pulang_cepat' => 0, 
             'belum_datang' => 0, 'belum_pulang' => 0, 'mangkir' => 0,
             'total_cuti' => 0, 'total_sakit' => 0,   
         ];
@@ -78,6 +78,11 @@ class AttendanceController extends Controller
                             $statusLabel = 'Hadir';
                             $colorClass = 'text-green-600 font-bold';
                             $summary['hadir']++;
+                            break;
+                        case 'piket':
+                            $statusLabel = 'Piket';
+                            $colorClass = 'text-emerald-400 font-bold';
+                            $summary['piket']++;
                             break;
                         case 'late':
                             $statusLabel = 'Terlambat';
@@ -255,8 +260,8 @@ class AttendanceController extends Controller
                         if ($inLog) $clockIn = $inLog->timestamp->format('H:i:s');
                         if ($outLog) $clockOut = $outLog->timestamp->format('H:i:s');
                         
-                        $status = 'present'; // Tetap status hadir
-                        $note = 'Lembur / Masuk Libur';
+                        $status = 'piket'; // Status piket
+                        $note = 'Lembur / Piket';
                     } else {
                         // Jika TIDAK ada log, set status khusus agar tidak dianggap 'absent' atau 'belum sync'
                         $status = 'holiday'; 

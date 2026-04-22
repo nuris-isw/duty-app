@@ -66,7 +66,7 @@ class AttendanceRecapController extends Controller
         foreach ($users as $user) {
             // Init Summary
             $summaryData[$user->id] = [
-                'hadir' => 0, 'terlambat' => 0, 'pulang_awal' => 0,
+                'hadir' => 0, 'piket' => 0, 'terlambat' => 0, 'pulang_awal' => 0,
                 'no_in' => 0, 'no_out' => 0, 'cuti' => 0, 'sakit' => 0, 'mangkir' => 0
             ];
 
@@ -94,6 +94,11 @@ class AttendanceRecapController extends Controller
                             $color = 'green';
                             $tooltip = "Hadir ($in - $out)";
                             $statusForCount = 'Hadir';
+                            break;
+                        case 'piket':
+                            $color = 'emerald';
+                            $tooltip = "Piket ($in - $out)";
+                            $statusForCount = 'Piket';
                             break;
                         case 'late':
                             $color = 'orange';
@@ -178,6 +183,7 @@ class AttendanceRecapController extends Controller
 
                 // --- UPDATE SUMMARY COUNTER ---
                 if ($statusForCount === 'Hadir') $summaryData[$user->id]['hadir']++;
+                if ($statusForCount === 'Piket') $summaryData[$user->id]['piket']++;
                 if ($statusForCount === 'Terlambat') {
                     $summaryData[$user->id]['hadir']++;
                     $summaryData[$user->id]['terlambat']++;

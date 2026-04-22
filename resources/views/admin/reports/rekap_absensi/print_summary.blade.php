@@ -15,6 +15,7 @@
         
         /* Warna Status (Opsional, DomPDF support warna basic) */
         .bg-green { background-color: #d1fae5; }
+        .bg-emerald { background-color: #d1fae5; }
         .bg-orange { background-color: #ffedd5; }
         .bg-yellow { background-color: #fef3c7; }
         .bg-blue { background-color: #e0f2fe; }
@@ -35,6 +36,7 @@
                 <th width="5%">No</th>
                 <th width="30%">Nama Pegawai</th>
                 <th>Hadir</th>
+                <th>Piket</th>
                 <th>Telat</th>
                 <th>Plg Awal</th>
                 <th>No In</th>
@@ -52,6 +54,7 @@
                     <td class="text-left">{{ $user->name }}</td>
                     
                     <td class="{{ $sum['hadir'] > 0 ? 'bg-green' : 'text-muted' }}">{{ $sum['hadir'] }}</td>
+                    <td class="{{ $sum['piket'] > 0 ? 'bg-emerald' : 'text-muted' }}">{{ $sum['piket'] > 0 ? $sum['piket'] : '-' }}</td>
                     <td class="{{ $sum['terlambat'] > 0 ? 'bg-orange' : 'text-muted' }}">{{ $sum['terlambat'] > 0 ? $sum['terlambat'] : '-' }}</td>
                     <td class="{{ $sum['pulang_awal'] > 0 ? 'bg-orange' : 'text-muted' }}">{{ $sum['pulang_awal'] > 0 ? $sum['pulang_awal'] : '-' }}</td>
                     <td class="{{ $sum['no_in'] > 0 ? 'bg-yellow' : 'text-muted' }}">{{ $sum['no_in'] > 0 ? $sum['no_in'] : '-' }}</td>

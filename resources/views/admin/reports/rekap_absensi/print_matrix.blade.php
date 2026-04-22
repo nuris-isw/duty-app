@@ -21,6 +21,7 @@
         .cell { width: 14px; height: 14px; margin: 0 auto; border-radius: 2px; line-height: 14px; font-size: 8px; font-weight: bold; }
         
         .bg-green  { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; } /* Hadir */
+        .bg-emerald { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; } /* Piket */
         .bg-orange { background-color: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; } /* Telat */
         .bg-yellow { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; } /* Data Kurang */
         .bg-blue   { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd; } /* Cuti */
@@ -43,6 +44,7 @@
     {{-- Legenda Mini --}}
     <div class="legend">
         <span style="background:#d1fae5"></span>Hadir
+        <span style="background:#d1fae5; margin-left:8px"></span>Piket
         <span style="background:#ffedd5; margin-left:8px"></span>Telat
         <span style="background:#fef3c7; margin-left:8px"></span>Kurang
         <span style="background:#e0f2fe; margin-left:8px"></span>Cuti
@@ -77,6 +79,7 @@
                             
                             switch($data['color']) {
                                 case 'green':  $class = 'bg-green';  $icon = '✓'; break;
+                                case 'emerald': $class = 'bg-emerald'; $icon = 'P'; break;
                                 case 'orange': $class = 'bg-orange'; $icon = '!'; break;
                                 case 'yellow': $class = 'bg-yellow'; $icon = '?'; break;
                                 case 'blue':   $class = 'bg-blue';   $icon = 'i'; break;

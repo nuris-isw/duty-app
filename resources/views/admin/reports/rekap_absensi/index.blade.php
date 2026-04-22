@@ -67,6 +67,7 @@
                                 <th class="p-3 border-b dark:border-neutral-700 w-10">No</th>
                                 <th class="p-3 border-b dark:border-neutral-700 text-left">Nama Pegawai</th>
                                 <th class="p-3 border-b dark:border-neutral-700 text-emerald-600">Hadir</th>
+                                <th class="p-3 border-b dark:border-neutral-700 text-emerald-600">Piket/Lembur</th>
                                 <th class="p-3 border-b dark:border-neutral-700 text-orange-600">Terlambat</th>
                                 <th class="p-3 border-b dark:border-neutral-700 text-orange-600">Pulang Awal</th>
                                 <th class="p-3 border-b dark:border-neutral-700 text-amber-600">No In</th>
@@ -87,38 +88,43 @@
                                     <td class="p-3 font-bold {{ $sum['hadir'] > 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-neutral-300 dark:text-neutral-600' }}">
                                         {{ $sum['hadir'] }}
                                     </td>
+
+                                    {{-- 2. PIKET (Emerald/Hijau) --}}
+                                    <td class="p-3 font-bold {{ $sum['piket'] > 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-neutral-300 dark:text-neutral-600' }}">
+                                        {{ $sum['piket'] > 0 ? $sum['piket'] : '-' }}
+                                    </td>
                                     
-                                    {{-- 2. TERLAMBAT (Orange) --}}
+                                    {{-- 3. TERLAMBAT (Orange) --}}
                                     <td class="p-3 font-bold {{ $sum['terlambat'] > 0 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' : 'text-neutral-300 dark:text-neutral-600' }}">
                                         {{ $sum['terlambat'] > 0 ? $sum['terlambat'] : '-' }}
                                     </td>
 
-                                    {{-- 3. PULANG AWAL (Orange) --}}
+                                    {{-- 4. PULANG AWAL (Orange) --}}
                                     <td class="p-3 font-bold {{ $sum['pulang_awal'] > 0 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' : 'text-neutral-300 dark:text-neutral-600' }}">
                                         {{ $sum['pulang_awal'] > 0 ? $sum['pulang_awal'] : '-' }}
                                     </td>
                                     
-                                    {{-- 4. NO IN (Amber/Kuning Gelap) --}}
+                                    {{-- 5. NO IN (Amber/Kuning Gelap) --}}
                                     <td class="p-3 font-bold {{ $sum['no_in'] > 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'text-neutral-300 dark:text-neutral-600' }}">
                                         {{ $sum['no_in'] > 0 ? $sum['no_in'] : '-' }}
                                     </td>
 
-                                    {{-- 5. NO OUT (Amber/Kuning Gelap) --}}
+                                    {{-- 6. NO OUT (Amber/Kuning Gelap) --}}
                                     <td class="p-3 font-bold {{ $sum['no_out'] > 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'text-neutral-300 dark:text-neutral-600' }}">
                                         {{ $sum['no_out'] > 0 ? $sum['no_out'] : '-' }}
                                     </td>
                                     
-                                    {{-- 6. CUTI (Sky Blue) --}}
+                                    {{-- 7. CUTI (Sky Blue) --}}
                                     <td class="p-3 font-bold {{ $sum['cuti'] > 0 ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400' : 'text-neutral-300 dark:text-neutral-600' }}">
                                         {{ $sum['cuti'] > 0 ? $sum['cuti'] : '-' }}
                                     </td>
 
-                                    {{-- 7. SAKIT (Sky Blue) --}}
+                                    {{-- 8. SAKIT (Sky Blue) --}}
                                     <td class="p-3 font-bold {{ $sum['sakit'] > 0 ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400' : 'text-neutral-300 dark:text-neutral-600' }}">
                                         {{ $sum['sakit'] > 0 ? $sum['sakit'] : '-' }}
                                     </td>
                                     
-                                    {{-- 8. MANGKIR (Rose/Merah) --}}
+                                    {{-- 9. MANGKIR (Rose/Merah) --}}
                                     <td class="p-3 font-bold {{ $sum['mangkir'] > 0 ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' : 'text-neutral-300 dark:text-neutral-600' }}">
                                         {{ $sum['mangkir'] > 0 ? $sum['mangkir'] : '-' }}
                                     </td>
@@ -139,6 +145,7 @@
                         {{-- Legenda --}}
                         <div class="flex flex-wrap justify-center md:justify-end gap-x-4 gap-y-2 text-xs text-neutral-600 dark:text-neutral-400 bg-white dark:bg-neutral-900 p-2 px-3 rounded-lg border border-dashed border-neutral-300 dark:border-neutral-700">
                             <div class="flex items-center"><span class="w-3 h-3 bg-emerald-100 border border-emerald-300 rounded-sm mr-2"></span> Hadir</div>
+                            <div class="flex items-center"><span class="w-3 h-3 bg-emerald-500 border border-emerald-600 rounded-sm mr-2"></span> Piket</div>
                             <div class="flex items-center"><span class="w-3 h-3 bg-orange-100 border border-orange-300 rounded-sm mr-2"></span> Terlambat</div>
                             <div class="flex items-center"><span class="w-3 h-3 bg-amber-100 border border-amber-300 rounded-sm mr-2"></span> Data Kurang</div>
                             <div class="flex items-center"><span class="w-3 h-3 bg-sky-100 border border-sky-300 rounded-sm mr-2"></span> Cuti</div>
@@ -192,6 +199,12 @@
                                                 case 'green':  
                                                     $colorClass = 'bg-emerald-100 border-emerald-200 text-emerald-600 dark:bg-emerald-900/30 dark:border-emerald-800 dark:text-emerald-400';
                                                     $icon = '✓'; 
+                                                    break;
+
+                                                // Piket (Hijau Lembut + Border)
+                                                case 'emerald':  
+                                                    $colorClass = 'bg-emerald-100 border-emerald-200 text-emerald-600 dark:bg-emerald-900/30 dark:border-emerald-800 dark:text-emerald-400';
+                                                    $icon = 'P'; 
                                                     break;
                                                     
                                                 // Terlambat (Orange Lembut)
