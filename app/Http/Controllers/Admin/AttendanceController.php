@@ -95,16 +95,19 @@ class AttendanceController extends Controller
                             $statusLabel = 'Pulang Cepat';
                             $colorClass = 'text-orange-600 font-bold';
                             $summary['pulang_cepat']++;
+                            $summary['hadir']++;
                             break;
                         case 'no_in':
                             $statusLabel = 'Belum Absen Datang';
                             $colorClass = 'text-purple-600 font-bold';
                             $summary['belum_datang']++;
+                            $summary['hadir']++;
                             break;
                         case 'no_out':
                             $statusLabel = 'Belum Absen Pulang';
                             $colorClass = 'text-purple-600 font-bold';
                             $summary['belum_pulang']++;
+                            $summary['hadir']++;
                             break;
                         case 'absent':
                             $statusLabel = 'Mangkir';

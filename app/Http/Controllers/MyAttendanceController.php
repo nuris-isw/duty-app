@@ -117,7 +117,7 @@ class MyAttendanceController extends Controller
             // Kita hitung berdasarkan $statusLabel yang sudah diproses di atas
             // Hanya hitung jika status BUKAN "Belum Di-rekap"
             if ($statusLabel !== 'Belum Di-rekap') {
-                if (Str::contains($statusLabel, ['Hadir', 'Lembur', 'Pulang Cepat'], true)) {
+                if (Str::contains($statusLabel, ['Hadir', 'Lembur', 'Pulang Cepat', 'Blm Absen', 'Belum Absen', 'Terlambat'], true)) {
                     $summary['hadir']++;
                 }
                 if (Str::contains($statusLabel, 'Terlambat', true)) {

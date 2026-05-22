@@ -9,11 +9,25 @@
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
+        <link rel="manifest" href="/manifest.json">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         
         {{-- FullCalendar --}}
         <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function () {
+                    navigator.serviceWorker
+                        .register('/service-worker.js')
+                        .then(function (registration) {
+                            console.log('Service Worker registered:', registration);
+                        })
+                        .catch(function (error) {
+                            console.log('Service Worker failed:', error);
+                        });
+                });
+            }
+        </script>
     </head>
     <body class="font-sans antialiased bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100">
         <div class="min-h-screen flex flex-col">

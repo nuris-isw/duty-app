@@ -192,8 +192,14 @@ class AttendanceRecapController extends Controller
                     $summaryData[$user->id]['hadir']++;
                     $summaryData[$user->id]['pulang_awal']++;
                 }
-                if ($statusForCount === 'No In') $summaryData[$user->id]['no_in']++;
-                if ($statusForCount === 'No Out') $summaryData[$user->id]['no_out']++;
+                if ($statusForCount === 'No In') {
+                    $summaryData[$user->id]['hadir']++;
+                    $summaryData[$user->id]['no_in']++;
+                }
+                if ($statusForCount === 'No Out') {
+                    $summaryData[$user->id]['no_out']++;
+                    $summaryData[$user->id]['hadir']++;
+                }
                 if ($statusForCount === 'Cuti') $summaryData[$user->id]['cuti']++;
                 if ($statusForCount === 'Sakit') $summaryData[$user->id]['sakit']++;
                 if ($statusForCount === 'Mangkir') $summaryData[$user->id]['mangkir']++;
